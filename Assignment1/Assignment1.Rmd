@@ -1,0 +1,34 @@
+---
+title: "Assignment1"
+author: "test"
+date: "2022-09-19"
+output: html_document
+---
+
+## Assignment 1
+
+## Libraries
+```{r}
+library(tidyverse)
+```
+
+## Load the data
+```{r}
+data <- read_csv("data/mcdonalds_dataset.csv")
+```
+
+## Inspect the data
+```{r}
+View(data)
+```
+
+## Transform the data
+```{r}
+# Todo
+```
+
+## Summarise the data
+```{r}
+# Todo
+```
+
