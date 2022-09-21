@@ -14,7 +14,7 @@ library(tidyverse)
 
 ## Load the data
 ```{r}
-data <- read_csv("spotify_top_charts_22.csv")
+data <- read_csv("data/spotify_top_charts_22.csv")
 ```
 
 ## Inspect the data
