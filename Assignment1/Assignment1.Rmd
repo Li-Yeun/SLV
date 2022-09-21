@@ -1,21 +1,43 @@
 ---
-title: "Assignment1"
-author: "test"
+title: "Supervised Learning and Visualisation"
+subtitle: "Assignment 1"
+author: "Abdool Al-Khaledi, Amalia Tsakali, Li-Yeun Xu, Willem van Veluw"
 date: "2022-09-19"
 output: html_document
 ---
 
-## Assignment 1
-
 ## Libraries
-```{r}
+```{r, message = FALSE, warning = FALSE}
 library(tidyverse)
 ```
 
 ## Load the data
-```{r}
-data <- read_csv("data/spotify_top_charts_22.csv")
+In this section we load and pre-process the data. This means that we define which variables are factors and change their labels. We will also add some variables in order to make pretty plots.\\
+
+Just for illustration: we can use Latex-language in markdown files:
+\begin{align*}
+  2x+ 1 & = 5\\
+  2x & = 4\\
+  x & = 2
+\end{align*}
+```{r, message = FALSE}
+data <- 
+  read_csv("data/spotify_top_charts_22.csv") %>% 
+  select(-uri) %>% 
+  mutate(key = recode(key, 
+                      "0"="C","1"="C#","2"="D","3"="D#","4"="E","5"="F","6"="F#","7"="G","8"="G#","9"="A",
+                      "10"="A#","11"="B") 
+                      %>% as.factor()) %>% 
+  mutate(mode = recode(mode, 
+                      "0" = "minor", "1" = "major") 
+                      %>% as.factor()) %>% 
+  mutate(time_signature = recode(time_signature, 
+                      "1" = "1/4", "3" = "3/4", "4" = "4/4", "5" = "5/4") 
+                      %>% as.factor()) %>% 
+  mutate(colab = case_when(grepl(",", artist_names) ~ "YES", !grepl(",", artist_names) ~ "NO") %>% as.factor())
+
 ```
+
 
 ## Inspect the data
 ```{r}
@@ -24,7 +46,6 @@ View(data)
 
 ## Transform and Clean the data
 ```{r}
-# Todo
 ```
 
 ## Create Tables
