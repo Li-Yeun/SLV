@@ -54,9 +54,158 @@ View(data)
 ```
 
 ## Create Plots
+
+```{r}
+library(ggpubr)
+#weeks on chart
+ggplot(data,aes(y=weeks_on_chart,x=peak_rank)) +geom_point() + stat_cor() +geom_smooth()
+#danceability
+ggplot(data,aes(y=danceability,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal() +geom_smooth()
+ggplot(data,aes(y=danceability,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal() +geom_smooth()
+#high danceability -> low rank (so more popular) when the key is B or G#
+ggplot(data,aes(y=danceability,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()+geom_smooth()
+ggplot(data,aes(y=danceability,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#only for time/signature 3/4
+data%>% filter(time_signature=="3/4") %>% ggplot(aes(y=danceability,x=peak_rank)) +
+  geom_point() + stat_cor() +theme_minimal() +geom_smooth()
+#energy
+ggplot(data,aes(y=energy,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=energy,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=energy,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=energy,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#loudness
+ggplot(data,aes(y=loudness,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=loudness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=loudness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=loudness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#speechiness
+ggplot(data,aes(y=speechiness,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=speechiness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=speechiness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=speechiness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#acousticness
+ggplot(data,aes(y=acousticness,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=acousticness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=acousticness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=acousticness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#instrumentalness
+#maybe we should filter out the 0 in this one
+ggplot(data,aes(y=instrumentalness,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=instrumentalness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=instrumentalness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=instrumentalness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#liveness
+ggplot(data,aes(y=liveness,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=liveness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=liveness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=liveness,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#tempo
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#tempo
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+ggplot(data,aes(y=tempo,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~colab) +theme_minimal()
+#duration_ms
+ggplot(data,aes(y=duration_ms,x=peak_rank)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=peak_rank)) +geom_point() + stat_cor() +facet_wrap(~colab) +theme_minimal()
+```
+varables correlation with weeks_on_chart
+```{r}
+#danceability
+ggplot(data,aes(y=danceability,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=danceability,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=danceability,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=danceability,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#energy
+ggplot(data,aes(y=energy,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=energy,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=energy,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=energy,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#loudness
+ggplot(data,aes(y=loudness,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=loudness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=loudness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=loudness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#speechiness
+ggplot(data,aes(y=speechiness,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=speechiness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=speechiness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=speechiness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#acousticness
+ggplot(data,aes(y=acousticness,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=acousticness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=acousticness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=acousticness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+#instrumentalness
+#maybe we should filter out the 0 in this one
+ggplot(data,aes(y=instrumentalness,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=instrumentalness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=instrumentalness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=instrumentalness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+ggplot(data,aes(y=instrumentalness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~colab) +theme_minimal()
+#liveness
+ggplot(data,aes(y=liveness,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=liveness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=liveness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=liveness,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+
+#tempo
+ggplot(data,aes(y=tempo,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=tempo,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=tempo,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=tempo,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+ggplot(data,aes(y=tempo,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~colab) +theme_minimal()
+#duration_ms
+ggplot(data,aes(y=duration_ms,x=weeks_on_chart)) +geom_point() + stat_cor() +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~key) +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~mode) +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~time_signature) +theme_minimal()
+ggplot(data,aes(y=duration_ms,x=weeks_on_chart)) +geom_point() + stat_cor() +facet_wrap(~colab) +theme_minimal()
+```
+
+several histograms/density lines
+```{r}
+data%>%filter(peak_rank==1) %>% ggplot(aes(x=weeks_on_chart))+geom_histogram(bins = 50)+theme_minimal()
+
+data%>%filter(peak_rank==1) %>% ggplot(aes(x=weeks_on_chart))+geom_density(aes(fill=key,alpha=0.3))+theme_minimal() 
+
+data%>% ggplot(aes(log10(x=weeks_on_chart)))+geom_density(aes(fill=key,alpha=0.3))+theme_minimal()
+data%>% ggplot(aes(x=weeks_on_chart))+geom_density(aes(fill=key,alpha=0.3))+theme_minimal()
+
+data%>%filter(peak_rank==1) %>%
+  ggplot(aes(x=weeks_on_chart))+geom_density(fill="deeppink1",alpha=0.3)+theme_minimal() +geom_rug(colour="deeppink1")
+
+ data%>%ggplot(aes(x=weeks_on_chart))+geom_density(fill="deeppink1",alpha=0.3)+theme_minimal() +geom_rug(colour="deeppink1")
+```
+
+
 ```{r}
 # Todo
+
+data%>%
+  ggplot( aes(x=instrumentalness, y= weeks_on_chart))+geom_point(aes(colour=mode))
 ```
+
+```{r}
+data%>%
+  ggplot( aes(x=instrumentalness, y= peak_rank))+geom_point(aes(colour=time_signature))
+```
+```{r}
+#boxplot for the factors with the average rank/or weeks
+data%>%ggplot(aes(x=key,y=peak_rank))+geom_boxplot()
+```
+```{r}
+data%>%ggplot(aes(x=key,y=weeks_on_chart))+geom_boxplot()
+```
+
 
 ## Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
 
