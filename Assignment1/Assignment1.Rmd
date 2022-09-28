@@ -14,12 +14,6 @@ library(tidyverse)
 ## Load the data
 In this section we load and pre-process the data. This means that we define which variables are factors and change their labels. We will also add some variables in order to make pretty plots.\\
 
-Just for illustration: we can use Latex-language in markdown files:
-\begin{align*}
-  2x+ 1 & = 5\\
-  2x & = 4\\
-  x & = 2
-\end{align*}
 ```{r, message = FALSE}
 data <- 
   read_csv("data/spotify_top_charts_22.csv") %>% 
@@ -49,14 +43,81 @@ View(data)
 ```
 
 ## Create Tables
-```{r}
-# Todo
-```
+In the dataset we have 11 numerical variables and four categorical variables. The summary statistics of 10 of the numerical variables are listed in the table below. 
 
-## Create Plots
-```{r}
-# Todo
+| Variable         | Mean     | Std      | Min      | Q1      | Median   | Q3       | Max      |
+| ---------------- | -------: | -------: | -------: | ------: | -------: | -------: | ------:  |
+| Weeks on chart   | 19.50    | 37.8139  | 1.0000   | 1.0000  | 5.0000   | 19.7500  | 269.0000 |
+| Danceability     | 0.6744   | 0.1515   | 0.1930   | 0.5690  | 0.6744   | 0.7907   | 0.9850   |
+| Energy           | 0.6408   | 0.1655   | 0.0218   | 0.5325  | 0.6520   | 0.7690   | 0.9720   |
+| Loudness         | -6.3560  | 2.6275   | -31.1600 | -7.7160 | -6.3560  | -4.5960  | -0.5140  |
+| Speechiness      | 0.1098   | 0.1022   | 0.0232   | 0.0413  | 0.0635   | 0.1358   | 0.6110   |
+| Acousticness     | 0.2557   | 0.2626   | 1.68e-05 | 0.0404  | 0.1555   | 0.4245   | 0.9690   |
+| Instrumentalness | 0.0137   | 0.0778   | 0.0000   | 0.0000  | 1.5e-06  | 1.e-4    | 0.9080   |
+| Liveness         | 0.1765   | 0.1338   | 0.0264   | 0.0931  | 0.1200   | 0.2318   | 0.9680   |
+| Tempo            | 121.0916 | 28.2680  | 66.1650  | 98.4300 | 119.9700 | 139.9700 | 205.8600 |
+| Duration (ms)    | 203630   | 54967    | 36935    | 169902  | 196389   | 229214   | 613027   |
+
+Note 1: about 30.3% of the songs only lasted one week on chart.  
+Note 2: about 48.3% of the songs have zero *instrumentalness*.  
+
+We did not include the last numerical variable *peak rank* here, because we are not sure how to interpret its summary statistics. For example, we already know that the minimal and maximal observation of this variable will be 1 and 200 respectively. In addition, what does a mean of 66 actually imply? Maybe that a top 200 song peaks at rank 66 on average.  
+We think of the variable *peak rank* as the dependent variable in an analysis model for data, as the variable we want to predict. We will use it often in creating exploratory plots.
+
+For the remaining four categorical variables we will show the frequencies by means of bar plots.  
+For *key* we have the following. We see, for example, that the mode of *key* is C#.
+```{r, echo = FALSE}
+key_bar <- 
+  data %>% ggplot(aes(x = key)) +
+  geom_bar() +
+  ylim(0,120) +
+  geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+key_bar
+```
+  
+The variable *mode* only has two possible values: either *minor* or *major*. We have 373 songs written in major and 273 songs in minor.  
+
+In the barplot below we see the frequencies of the variable *time signature*. The majority of the songs are written in a time signature of 4/4.
+```{r, echo = FALSE}
+time_signature_bar <-
+  data %>% ggplot(aes(x = time_signature)) +
+  geom_bar() +
+  labs(x = "time signature") +
+  ylim(0, 625) +
+  geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+time_signature_bar
+```
+  
+During the exploration of the dataset, we noticed that many of the top songs are colaborations of artists. However, the majority of songs are written by one artist compared to colaborations of artists: 417 and 229 respectively.
+
+## Nice plot
+When considering the first two variables of the dataset, *peak rank* and *weeks on chart*, one might expect that songs with a high peak rank will last more weeks on chart. Indeed, for a song at rank 1 in may take more weeks to drop out the top 200. To explore this thought, we made the plot below.  
+From the plot we see our thought confirmed, or at least up to some peak rank. For the really popular songs, songs with a rank between 1 and 50, it is clear that they stay on the chart for weeks than less popular songs do. We test this by performing a correlation test:
+```{r, echo = FALSE}
+cor.test(data$peak_rank, data$weeks_on_chart)
+```
+From the p-value we conclude that the correlation is not equal to 0. Therefore, we conclude that peak rank indeed affects the number of weeks on chart. Note that the correlation is negative, because songs with low peak rank tend to stay long on the chart.
+```{r, echo = FALSE}
+rank_weeks <-
+  data %>% ggplot(aes(x = peak_rank, y = weeks_on_chart)) +
+  geom_point() +
+  geom_smooth(colour = "red") +
+  theme_minimal()
+
+rank_weeks
 ```
 
 ## Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
+
+## Cleaning the data
+To clean the data, we have
+
+- Deleted "uri"
+- Recoded the variables key, mode and time signature
+- Defined the variables key, mode and time signature as being factors
+- Added a variable colab. This tells whether or not the song is a collaboration of artists
 
