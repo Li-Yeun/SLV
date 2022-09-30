@@ -47,6 +47,7 @@ In the dataset we have 11 numerical variables and four categorical variables. Th
 
 | Variable         | Mean     | Std      | Min      | Q1      | Median   | Q3       | Max      |
 | ---------------- | -------: | -------: | -------: | ------: | -------: | -------: | ------:  |
+| Peak rank        | 65.92    | 57.0045  | 1.0000   | 15.0000 | 51.5000  | 108.7500 | 200.0000 |
 | Weeks on chart   | 19.50    | 37.8139  | 1.0000   | 1.0000  | 5.0000   | 19.7500  | 269.0000 |
 | Danceability     | 0.6744   | 0.1515   | 0.1930   | 0.5690  | 0.6744   | 0.7907   | 0.9850   |
 | Energy           | 0.6408   | 0.1655   | 0.0218   | 0.5325  | 0.6520   | 0.7690   | 0.9720   |
@@ -60,9 +61,6 @@ In the dataset we have 11 numerical variables and four categorical variables. Th
 
 Note 1: about 30.3% of the songs only lasted one week on chart.  
 Note 2: about 48.3% of the songs have zero *instrumentalness*.  
-
-We did not include the last numerical variable *peak rank* here, because we are not sure how to interpret its summary statistics. For example, we already know that the minimal and maximal observation of this variable will be 1 and 200 respectively. In addition, what does a mean of 66 actually imply? Maybe that a top 200 song peaks at rank 66 on average.  
-We think of the variable *peak rank* as the dependent variable in an analysis model for data, as the variable we want to predict. We will use it often in creating exploratory plots.
 
 For the remaining four categorical variables we will show the frequencies by means of bar plots.  
 For *key* we have the following. We see, for example, that the mode of *key* is C#.
