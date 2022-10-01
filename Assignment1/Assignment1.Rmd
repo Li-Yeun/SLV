@@ -73,7 +73,6 @@ for (i in 1:length(numeric_features_indices))
       {
         if(k==0)
         {
-          
           plot <- data %>% 
                     ggplot(aes_string(y=colnames(data[numeric_features_indices[i]]), x=colnames(data[numeric_features_indices[j]]))) + 
                     geom_point() + stat_cor() + theme_minimal()
@@ -89,6 +88,24 @@ for (i in 1:length(numeric_features_indices))
       }
       
 ```
+```{r}
+plot1 <- data %>% 
+  ggplot(aes(x = loudness, y = energy)) +
+  geom_point() +
+  geom_smooth(method='lm', colour = "red") +
+  xlim(-15, 0) +
+  theme_minimal()
 
+plot1
+```
+```{r}
+plot2 <- data %>% 
+  ggplot(aes(x = acousticness, y = energy)) +
+  geom_point() +
+  geom_smooth(method='lm', colour = "red") +
+  theme_minimal()
+
+plot2
+```
 ## Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
 
