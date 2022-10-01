@@ -10,6 +10,7 @@ output: html_document
 For the purpose of this assignment, exploratory data analysis will be performed on the data set “Spotify top chart songs 2022”, which was obtained from Kaggle and uploaded by user “SVETA151”. The dataset is a collection of top charting songs in 2022 according to the weekly Spotify Top 200 Global chart. Each of the songs listed in the dataset has charted in the top 200 according to Spotify for a minimum of one week. That being said, the dataset contains 646 rows along with 17 columns. Each row lists a unique song while each column outlines a different feature of the song. These features include necessary identifying information such as artist(s) and song name. Moreover, these features include numerical measures such as weeks on chart, loudness, tempo and duration. Along with categorical measures such as the key of the song, the time signature and modality (major/minor). For this assignment, various factettes of the dataset will be analyzed. Focus will be placed on comparing features to determine if any correlate with each other. Furthermore, we will also investigate whether any feature correlates with the number of weeks charted, or the peak rank.
 
 ## Libraries & Packages
+
 ```{r, message = FALSE, warning = FALSE}
 list.of.packages <- c("ggpubr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -120,7 +121,7 @@ rank_weeks
 ```
 To test if more features have a correlation, we created scatterplots for every other numerical feature tested against each other. A small for-loop was written to automate this process. From the results we found that the following features have a correlation:
 
-```{r, echo=False, warning=False, }
+```{r, echo=False, warning=False}
 data %>% 
   ggplot(aes(x = loudness, y = energy)) +
   geom_point() +
