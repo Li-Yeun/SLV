@@ -6,8 +6,17 @@ date: "2022-09-19"
 output: html_document
 ---
 
-## Libraries
+## Introduction
+For the purpose of this assignment, exploratory data analysis will be performed on the data set “Spotify top chart songs 2022”, which was obtained from Kaggle and uploaded by user “SVETA151”. The dataset is a collection of top charting songs in 2022 according to the weekly Spotify Top 200 Global chart. Each of the songs listed in the dataset has charted in the top 200 according to Spotify for a minimum of one week. That being said, the dataset contains 646 rows along with 17 columns. Each row lists a unique song while each column outlines a different feature of the song. These features include necessary identifying information such as artist(s) and song name. Moreover, these features include numerical measures such as weeks on chart, loudness, tempo and duration. Along with categorical measures such as the key of the song, the time signature and modality (major/minor). For this assignment, various factettes of the dataset will be analyzed. Focus will be placed on comparing features to determine if any correlate with each other. Furthermore, we will also investigate whether any feature correlates with the number of weeks charted, or the peak rank.
+
+## Libraries & Packages
 ```{r, message = FALSE, warning = FALSE}
+list.of.packages <- c("ggpubr")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) 
+  install.packages(new.packages)
+
+library(ggpubr)
 library(tidyverse)
 ```
 
@@ -92,6 +101,7 @@ time_signature_bar
   
 During the exploration of the dataset, we noticed that many of the top songs are colaborations of artists. However, the majority of songs are written by one artist compared to colaborations of artists: 417 and 229 respectively.
 
+
 ## Nice plot
 When considering the first two variables of the dataset, *peak rank* and *weeks on chart*, one might expect that songs with a high peak rank will last more weeks on chart. Indeed, for a song at rank 1 in may take more weeks to drop out the top 200. To explore this thought, we made the plot below.  
 From the plot we see our thought confirmed, or at least up to some peak rank. For the really popular songs, songs with a rank between 1 and 50, it is clear that they stay on the chart for weeks than less popular songs do. We test this by performing a correlation test:
@@ -103,12 +113,32 @@ From the p-value we conclude that the correlation is not equal to 0. Therefore, 
 rank_weeks <-
   data %>% ggplot(aes(x = peak_rank, y = weeks_on_chart)) +
   geom_point() +
-  geom_smooth(colour = "red") +
+  geom_smooth(colour = "red", se=FALSE) +
   theme_minimal()
 
 rank_weeks
 ```
+To test if more features have a correlation, we created scatterplots for every other numerical feature tested against each other. A small for-loop was written to automate this process. From the results we found that the following features have a correlation:
 
+```{r, echo=False, warning=False, }
+data %>% 
+  ggplot(aes(x = loudness, y = energy)) +
+  geom_point() +
+  geom_smooth(method='lm', colour = "#FF0000", se=FALSE) +
+  xlim(-15, 0) +
+  stat_cor(colour = "#0000FF") +
+  theme_minimal()
+```
+
+```{r, echo=False}
+data %>% 
+  ggplot(aes(x = acousticness, y = energy)) +
+  geom_point() +
+  geom_smooth(method='lm', colour = "#FF0000", se=FALSE) +
+  stat_cor(label.x = 0.75, label.y = 0.95, colour = "#0000FF") +
+  theme_minimal()
+
+```
 ## Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
 
 ## Cleaning the data
