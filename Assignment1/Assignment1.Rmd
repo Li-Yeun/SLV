@@ -67,6 +67,23 @@ categorical_features_indices <- c(7,9,15,17)
 
 # Features vs Features
 for (i in 1:length(numeric_features_indices))
+    for (j in 1:length(categorical_features_indices))
+    {
+      plot <- data %>% 
+                ggplot(aes_string(x=colnames(data[numeric_features_indices[i]]), fill=colnames(data[categorical_features_indices[j]]))) + 
+                geom_density(alpha = .5, colour = NA) + theme_minimal()
+      print(plot)
+    }
+  
+```
+
+```{r}
+numeric_features_indices <- c(3,4,5,6,8,10,11,12,13,14,16)
+# length of the song name as a feature
+categorical_features_indices <- c(7,9,15,17)
+
+# Features vs Features
+for (i in 1:length(numeric_features_indices))
   for (j in 1:length(numeric_features_indices))
     if(i != j)
       for (k in 0:length(categorical_features_indices))
@@ -88,21 +105,25 @@ for (i in 1:length(numeric_features_indices))
       }
       
 ```
+
 ```{r}
 plot1 <- data %>% 
   ggplot(aes(x = loudness, y = energy)) +
   geom_point() +
   geom_smooth(method='lm', colour = "red") +
   xlim(-15, 0) +
+  stat_cor() +
   theme_minimal()
 
 plot1
 ```
+
 ```{r}
 plot2 <- data %>% 
   ggplot(aes(x = acousticness, y = energy)) +
   geom_point() +
   geom_smooth(method='lm', colour = "red") +
+  stat_cor() +
   theme_minimal()
 
 plot2
