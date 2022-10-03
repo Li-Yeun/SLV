@@ -151,12 +151,14 @@ data%>%
 ```
 
 ```{r, echo = FALSE}
+pop_keys <- c("C#","C","D","G#","F","G")
+
 data%>% 
   filter(peak_rank==1)%>% 
   filter(key %in%pop_keys)%>%
   ggplot(aes(x=weeks_on_chart))+
   geom_density(aes(fill=key) ,alpha=0.5)+
-  theme_minimal()
+  theme_minimal() +
   labs(title  = "                                                      Figure 7")
 ```
 
