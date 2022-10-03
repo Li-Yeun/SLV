@@ -70,13 +70,17 @@ Note 2: about 48.3% of the songs have zero *instrumentalness*.
 
 For the remaining four categorical variables we will show the frequencies by means of bar plots.  
 For *key* we have the following. We see, for example, that the mode of *key* is C#.
+
+
 ```{r, echo = FALSE}
 key_bar <- 
   data %>% ggplot(aes(x = key)) +
   geom_bar() +
   ylim(0,120) +
   geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
-  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  labs(title  = "                                                               Figure 1")
+
 
 key_bar
 ```
@@ -84,6 +88,8 @@ key_bar
 The variable *mode* only has two possible values: either *minor* or *major*. We have 373 songs written in major and 273 songs in minor.  
 
 In the barplot below we see the frequencies of the variable *time signature*. The majority of the songs are written in a time signature of 4/4.
+
+
 ```{r, echo = FALSE}
 time_signature_bar <-
   data %>% ggplot(aes(x = time_signature)) +
@@ -91,7 +97,8 @@ time_signature_bar <-
   labs(x = "time signature") +
   ylim(0, 625) +
   geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
-  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  labs(title  = "                                                               Figure 2")
 
 time_signature_bar
 ```
@@ -106,12 +113,15 @@ From the plot we see our thought confirmed, or at least up to some peak rank. Fo
 cor.test(data$peak_rank, data$weeks_on_chart)
 ```
 From the p-value we conclude that the correlation is not equal to 0. Therefore, we conclude that peak rank indeed affects the number of weeks on chart. Note that the correlation is negative, because songs with low peak rank tend to stay long on the chart.
+
+
 ```{r, echo = FALSE}
 rank_weeks <-
   data %>% ggplot(aes(x = peak_rank, y = weeks_on_chart)) +
   geom_point() +
   geom_smooth(colour = "red", se=FALSE) +
-  theme_minimal()
+  theme_minimal() +
+  labs(title  = "                                                               Figure 3")
 
 rank_weeks
 ```
@@ -125,7 +135,8 @@ data %>%
   geom_smooth(method='lm', colour = "#FF0000", se=FALSE) +
   xlim(-15, 0) +
   stat_cor(colour = "#0000FF") +
-  theme_minimal()
+  theme_minimal() +
+  labs(title  = "                                                               Figure 4")
 ```
 
 ```{r, echo=FALSE}
@@ -134,11 +145,12 @@ data %>%
   geom_point() +
   geom_smooth(method='lm', colour = "#FF0000", se=FALSE) +
   stat_cor(label.x = 0.75, label.y = 0.95, colour = "#0000FF") +
-  theme_minimal()
+  theme_minimal() +
+  labs(title  = "                                                               Figure 5")
 
 ```
 
-For the categorical variables, we tested too see if the key of the song have an affect on the peak_rank or the weeks_on_chart. From our common knowledge we know that most pop-songs are written in the C-key. Therefore, we assume that songs written in other keys will performe less on the charts. To confirm our suspicion we plotted the following box-plots.
+For the categorical variables, we tested too see if the key of the song have an affect on the peak_rank or the weeks_on_chart. From our common knowledge we know that most pop-songs are written in the C-key. Therefore, we assume that songs written in other keys will perform less on the charts. To confirm our suspicion we plotted the following box-plots.
 ```{r, echo=FALSE}
 data%>%ggplot(aes(x=key,y=peak_rank))+geom_boxplot() + theme_minimal()
 ```
@@ -147,9 +159,15 @@ data%>%ggplot(aes(x=key,y=weeks_on_chart))+geom_boxplot() + theme_minimal() + co
 ```
 
 From the results we can confirm that songs written in the C-key do have a higher peak-rank on average than songs written in other keys. However  songs written in the C-key doesn't seems to stay longer on the chart, than songs written in other keys.
-## Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
+```{r, echo = FALSE }
+#time signature
+data%>%ggplot(aes(x=time_signature,y=peak_rank))+geom_boxplot()+theme_minimal()
+```
 
-## Cleaning the data
+
+# Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
+
+##1. Cleaning the data
 To clean the data, we have
 
 - Deleted "uri"
@@ -157,3 +175,7 @@ To clean the data, we have
 - Defined the variables key, mode and time signature as being factors
 - Added a variable colab. This tells whether or not the song is a collaboration of artists
 
+##2. Sumarry Statistics
+Summary statistics for measures such as mean, median, min/max, along with the first and 3rd interquartile ranges have been tabulated for the 11 numerical features. These measures demonstrate interesting properties of the top charting songs in 2022. For example, a charting song peaked at rank 65 ± 57 on average and lasted 19 ± 37 weeks in the chart. Although it is worth mentioning that the standard deviation of both of these measures is very high, demonstrating a high degree of variance in the highest rank achieved by a song and the number of weeks it charts.   Furthermore, songs were more likely to score higher on measures of energy and danceability (0.6408 ± 0.1655 and 0.6744 ± 0.1515) than on speechiness, acousticness, liveness and instrumentalness, with these values ranging from (0.1037 – 0.2557). This demonstrates that a top charting song tends to be energetic as opposed to calm and acoustic. This conclusion is further supported by the fact that 48.3% of songs reported 0 instrumentalness. Where instrumentalness here refers to musicality achieved through stretches of instrumentation as opposed to vocal performances.
+
+When considering the first two variables of the dataset, peak rank and weeks on chart, one might expect that songs with a high peak rank will last more weeks on chart. For a song at rank 1, it may take more weeks to drop out the top 200 due to the high popularity of the song. To explore this thought, we made the plot investigating weeks on chart vs peak rank.  From the plot we see our thought confirmed, or at least up to some peak rank. For the really popular songs, songs with a rank between 1 and 50, it is clear that they stay on the chart for weeks than less popular songs do. We test this by performing a Pearsons correlation test. The test returned a correlation estimate of -0.3525126. This demonstrates a negative correlation since a higher peak rank is represented by a low numerical estimate. Furthermore, a “For loop” was written to test every numerical feature against another. This returned energy/loudness correlation of 0.69 p<2.2e-16 and an Energy/acousticness correlation of -0.59 p<2.2e-16.
