@@ -79,7 +79,7 @@ key_bar <-
   ylim(0,120) +
   geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
   theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
-  labs(title  = "                                                               Figure 1")
+  labs(title  = "                                                            Figure 1")
 
 
 key_bar
@@ -98,7 +98,7 @@ time_signature_bar <-
   ylim(0, 625) +
   geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
   theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
-  labs(title  = "                                                               Figure 2")
+  labs(title  = "                                                            Figure 2")
 
 time_signature_bar
 ```
@@ -121,7 +121,7 @@ rank_weeks <-
   geom_point() +
   geom_smooth(colour = "red", se=FALSE) +
   theme_minimal() +
-  labs(title  = "                                                               Figure 3")
+  labs(title  = "                                                       Figure 3")
 
 rank_weeks
 ```
@@ -136,20 +136,25 @@ data %>%
   xlim(-15, 0) +
   stat_cor(colour = "#0000FF") +
   theme_minimal() +
-  labs(title  = "                                                               Figure 4")
+  labs(title  = "                                                       Figure 4")
 ```
 
+```{r, echo=FALSE}
+ggplot(data,aes(y=energy,x=weeks_on_chart))+
+  geom_point() +
+  stat_cor(label.x = 0.4, label.y = 0.1)+
+  facet_wrap(~key) +
+  labs(x="Weeks on Chart", title  = "                                                       Figure 5") + 
+  theme_minimal()
+```
 
 ```{r, echo = FALSE}
 data%>%
   filter(peak_rank<10) %>% 
   ggplot(aes(x=weeks_on_chart, fill=mode))+
   geom_density(alpha=0.3)+
-  labs(x="Weeks on Chart", title  = "                                                               Figure 5") + 
+  labs(x="Weeks on Chart", title  = "                                                   Figure 6") + 
   theme_minimal()
-```
-```{r, echo=FALSE}
-ggplot(data,aes(y=energy,x=weeks_on_chart)) +geom_point() + stat_cor(label.x = 0.4, label.y = 0.1) +facet_wrap(~key) +theme_minimal()
 ```
 
 ```{r, echo = FALSE }
@@ -159,14 +164,15 @@ data%>%
   geom_boxplot()+
   theme_minimal()+
   coord_cartesian(ylim=c(0,50)) +
-  labs(title  = "                                                               Figure 6")
+  labs(title  = "                                                      Figure 7")
 ```
+
 ```{r, echo = FALSE}
 data%>%
   ggplot(aes(x=time_signature,y=peak_rank))+
   geom_boxplot()+
   theme_minimal() +
-  labs(title  = "                                                               Figure 8")
+  labs(title  = "                                                       Figure 8")
 ```
 
 
