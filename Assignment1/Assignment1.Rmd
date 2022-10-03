@@ -48,10 +48,6 @@ data <-
 View(data)
 ```
 
-## Transform and Clean the data
-```{r}
-```
-
 ## Create Tables
 In the dataset we have 11 numerical variables and four categorical variables. The summary statistics of 10 of the numerical variables are listed in the table below. 
 
@@ -119,9 +115,10 @@ rank_weeks <-
 
 rank_weeks
 ```
+
 To test if more features have a correlation, we created scatterplots for every other numerical feature tested against each other. A small for-loop was written to automate this process. From the results we found that the following features have a correlation:
 
-```{r, echo=False, warning=False}
+```{r, echo=FALSE, warning=FALSE}
 data %>% 
   ggplot(aes(x = loudness, y = energy)) +
   geom_point() +
@@ -131,7 +128,7 @@ data %>%
   theme_minimal()
 ```
 
-```{r, echo=False}
+```{r, echo=FALSE}
 data %>% 
   ggplot(aes(x = acousticness, y = energy)) +
   geom_point() +
@@ -142,12 +139,13 @@ data %>%
 ```
 
 For the categorical variables, we tested too see if the key of the song have an affect on the peak_rank or the weeks_on_chart. From our common knowledge we know that most pop-songs are written in the C-key. Therefore, we assume that songs written in other keys will performe less on the charts. To confirm our suspicion we plotted the following box-plots.
-```{r}
+```{r, echo=FALSE}
 data%>%ggplot(aes(x=key,y=peak_rank))+geom_boxplot() + theme_minimal()
 ```
-```{r}
+```{r, echo=FALSE}
 data%>%ggplot(aes(x=key,y=weeks_on_chart))+geom_boxplot() + theme_minimal() + coord_cartesian(ylim = c(0,50))
 ```
+
 From the results we can confirm that songs written in the C-key do have a higher peak-rank on average than songs written in other keys. However  songs written in the C-key doesn't seems to stay longer on the chart, than songs written in other keys.
 ## Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
 
