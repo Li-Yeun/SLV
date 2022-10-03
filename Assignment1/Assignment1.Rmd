@@ -149,19 +149,30 @@ data %>%
   labs(title  = "                                                               Figure 5")
 
 ```
-
-For the categorical variables, we tested too see if the key of the song have an affect on the peak_rank or the weeks_on_chart. From our common knowledge we know that most pop-songs are written in the C-key. Therefore, we assume that songs written in other keys will perform less on the charts. To confirm our suspicion we plotted the following box-plots.
-```{r, echo=FALSE}
-data%>%ggplot(aes(x=key,y=peak_rank))+geom_boxplot() + theme_minimal()
+```{r,  echo = FALSE}
+ggplot(data,aes(y=danceability,x=peak_rank))+
+  geom_point()+
+  stat_cor(label.x = 150, label.y = 0.95, colour = "#0000FF")+
+  theme_minimal()+
+  geom_smooth(se = FALSE, colour = "#FF0000") +
+  labs(title  = "                                                               Figure 6")
 ```
-```{r, echo=FALSE}
-data%>%ggplot(aes(x=key,y=weeks_on_chart))+geom_boxplot() + theme_minimal() + coord_cartesian(ylim = c(0,50))
-```
 
-From the results we can confirm that songs written in the C-key do have a higher peak-rank on average than songs written in other keys. However  songs written in the C-key doesn't seems to stay longer on the chart, than songs written in other keys.
 ```{r, echo = FALSE }
 #time signature
-data%>%ggplot(aes(x=time_signature,y=peak_rank))+geom_boxplot()+theme_minimal()
+data%>%
+  ggplot(aes(x=time_signature,y=weeks_on_chart))+
+  geom_boxplot()+
+  theme_minimal()+
+  coord_cartesian(ylim=c(0,50)) +
+  labs(title  = "                                                               Figure 7")
+```
+```{r, echo = FALSE}
+data%>%
+  ggplot(aes(x=time_signature,y=peak_rank))+
+  geom_boxplot()+
+  theme_minimal() +
+  labs(title  = "                                                               Figure 8")
 ```
 
 
