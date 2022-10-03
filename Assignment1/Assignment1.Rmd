@@ -139,23 +139,17 @@ data %>%
   labs(title  = "                                                               Figure 4")
 ```
 
-```{r, echo=FALSE}
-data %>% 
-  ggplot(aes(x = acousticness, y = energy)) +
-  geom_point() +
-  geom_smooth(method='lm', colour = "#FF0000", se=FALSE) +
-  stat_cor(label.x = 0.75, label.y = 0.95, colour = "#0000FF") +
-  theme_minimal() +
-  labs(title  = "                                                               Figure 5")
 
+```{r, echo = FALSE}
+data%>%
+  filter(peak_rank<10) %>% 
+  ggplot(aes(x=weeks_on_chart, fill=mode))+
+  geom_density(alpha=0.3)+
+  labs(x="Weeks on Chart", title  = "                                                               Figure 5") + 
+  theme_minimal()
 ```
-```{r,  echo = FALSE}
-ggplot(data,aes(y=danceability,x=peak_rank))+
-  geom_point()+
-  stat_cor(label.x = 150, label.y = 0.95, colour = "#0000FF")+
-  theme_minimal()+
-  geom_smooth(se = FALSE, colour = "#FF0000") +
-  labs(title  = "                                                               Figure 6")
+```{r, echo=FALSE}
+ggplot(data,aes(y=energy,x=weeks_on_chart)) +geom_point() + stat_cor(label.x = 0.4, label.y = 0.1) +facet_wrap(~key) +theme_minimal()
 ```
 
 ```{r, echo = FALSE }
@@ -165,7 +159,7 @@ data%>%
   geom_boxplot()+
   theme_minimal()+
   coord_cartesian(ylim=c(0,50)) +
-  labs(title  = "                                                               Figure 7")
+  labs(title  = "                                                               Figure 6")
 ```
 ```{r, echo = FALSE}
 data%>%
