@@ -48,8 +48,9 @@ data <-
 View(data)
 ```
 
-## Create Tables
-In the dataset we have 11 numerical variables and four categorical variables. The summary statistics of 10 of the numerical variables are listed in the table below. 
+## Create Table
+Summary statistics for measures such as mean, median, min/max, along with the first and 3rd interquartile ranges have been tabulated for the 11 numerical features. These measures demonstrate interesting properties of the top charting songs in 2022. For example, a charting song peaked at rank 65 ± 57 on average and lasted 19 ± 37 weeks in the chart. Although it is worth mentioning that the standard deviation of both of these measures is very high, demonstrating a high degree of variance in the highest rank achieved by a song and the number of weeks it charts.   Furthermore, songs were more likely to score higher on measures of energy and danceability (0.6408 ± 0.1655 and 0.6744 ± 0.1515) than on speechiness, acousticness, liveness and instrumentalness, with these values ranging from (0.1037 – 0.2557). This demonstrates that a top charting song tends to be energetic as opposed to calm and acoustic. This conclusion is further supported by the fact that 48.3% of songs reported 0 instrumentalness. Where instrumentalness here refers to musicality achieved through stretches of instrumentation as opposed to vocal performances.
+
 
 | Variable         | Mean     | Std      | Min      | Q1      | Median   | Q3       | Max      |
 | ---------------- | -------: | -------: | -------: | ------: | -------: | -------: | ------:  |
@@ -64,12 +65,6 @@ In the dataset we have 11 numerical variables and four categorical variables. Th
 | Liveness         | 0.1765   | 0.1338   | 0.0264   | 0.0931  | 0.1200   | 0.2318   | 0.9680   |
 | Tempo            | 121.0916 | 28.2680  | 66.1650  | 98.4300 | 119.9700 | 139.9700 | 205.8600 |
 | Duration (ms)    | 203630   | 54967    | 36935    | 169902  | 196389   | 229214   | 613027   |
-
-Note 1: about 30.3% of the songs only lasted one week on chart.  
-Note 2: about 48.3% of the songs have zero *instrumentalness*.  
-
-For the remaining four categorical variables we will show the frequencies by means of bar plots.  
-For *key* we have the following. We see, for example, that the mode of *key* is C#.
 
 
 ```{r, echo = FALSE}
@@ -107,12 +102,12 @@ During the exploration of the dataset, we noticed that many of the top songs are
 
 
 ## Nice plot
-When considering the first two variables of the dataset, *peak rank* and *weeks on chart*, one might expect that songs with a high peak rank will last more weeks on chart. Indeed, for a song at rank 1 in may take more weeks to drop out the top 200. To explore this thought, we made the plot below.  
-From the plot we see our thought confirmed, or at least up to some peak rank. For the really popular songs, songs with a rank between 1 and 50, it is clear that they stay on the chart for weeks than less popular songs do. We test this by performing a correlation test:
+When considering the first two variables of the dataset, peak rank and weeks on chart, one might expect that songs with a high peak rank will last more weeks on chart.
+For a song at rank 1, it may take more weeks to drop out the top 200 due to the high popularity of the song. To explore this thought, we made the plot investigating weeks on chart vs peak rank.  From the plot we see our thought confirmed, or at least up to some peak rank. For the really popular songs, songs with a rank between 1 and 50, it is clear that they stay on the chart for weeks than less popular songs do. We test this by performing a Pearsons correlation test. The test returned a correlation estimate of -0.3525126. This demonstrates a negative correlation since a higher peak rank is represented by a low numerical estimate. Furthermore, a “For loop” was written to test every numerical feature against another. This returned energy/loudness correlation of 0.69 p<2.2e-16 and an Energy/acousticness correlation of -0.59 p<2.2e-16.
+
 ```{r, echo = FALSE}
 cor.test(data$peak_rank, data$weeks_on_chart)
 ```
-From the p-value we conclude that the correlation is not equal to 0. Therefore, we conclude that peak rank indeed affects the number of weeks on chart. Note that the correlation is negative, because songs with low peak rank tend to stay long on the chart.
 
 
 ```{r, echo = FALSE}
@@ -125,8 +120,6 @@ rank_weeks <-
 
 rank_weeks
 ```
-
-To test if more features have a correlation, we created scatterplots for every other numerical feature tested against each other. A small for-loop was written to automate this process. From the results we found that the following features have a correlation:
 
 ```{r, echo=FALSE, warning=FALSE}
 data %>% 
@@ -157,6 +150,16 @@ data%>%
   theme_minimal()
 ```
 
+```{r, echo = FALSE}
+data%>% 
+  filter(peak_rank==1)%>% 
+  filter(key %in%pop_keys)%>%
+  ggplot(aes(x=weeks_on_chart))+
+  geom_density(aes(fill=key) ,alpha=0.5)+
+  theme_minimal()
+  labs(title  = "                                                      Figure 7")
+```
+
 ```{r, echo = FALSE }
 #time signature
 data%>%
@@ -164,7 +167,7 @@ data%>%
   geom_boxplot()+
   theme_minimal()+
   coord_cartesian(ylim=c(0,50)) +
-  labs(title  = "                                                      Figure 7")
+  labs(title  = "                                                      Figure 8")
 ```
 
 ```{r, echo = FALSE}
@@ -172,13 +175,13 @@ data%>%
   ggplot(aes(x=time_signature,y=peak_rank))+
   geom_boxplot()+
   theme_minimal() +
-  labs(title  = "                                                       Figure 8")
+  labs(title  = "                                                       Figure 9")
 ```
 
 
 # Explain what you did and why (maximum 5 paragraphs total) if applicable, note findings such as missingness, outliers or unlikely values or group differences, etcetera.
 
-##1. Cleaning the data
+## 1. Cleaning the data
 To clean the data, we have
 
 - Deleted "uri"
@@ -186,7 +189,7 @@ To clean the data, we have
 - Defined the variables key, mode and time signature as being factors
 - Added a variable colab. This tells whether or not the song is a collaboration of artists
 
-##2. Sumarry Statistics
-Summary statistics for measures such as mean, median, min/max, along with the first and 3rd interquartile ranges have been tabulated for the 11 numerical features. These measures demonstrate interesting properties of the top charting songs in 2022. For example, a charting song peaked at rank 65 ± 57 on average and lasted 19 ± 37 weeks in the chart. Although it is worth mentioning that the standard deviation of both of these measures is very high, demonstrating a high degree of variance in the highest rank achieved by a song and the number of weeks it charts.   Furthermore, songs were more likely to score higher on measures of energy and danceability (0.6408 ± 0.1655 and 0.6744 ± 0.1515) than on speechiness, acousticness, liveness and instrumentalness, with these values ranging from (0.1037 – 0.2557). This demonstrates that a top charting song tends to be energetic as opposed to calm and acoustic. This conclusion is further supported by the fact that 48.3% of songs reported 0 instrumentalness. Where instrumentalness here refers to musicality achieved through stretches of instrumentation as opposed to vocal performances.
 
-When considering the first two variables of the dataset, peak rank and weeks on chart, one might expect that songs with a high peak rank will last more weeks on chart. For a song at rank 1, it may take more weeks to drop out the top 200 due to the high popularity of the song. To explore this thought, we made the plot investigating weeks on chart vs peak rank.  From the plot we see our thought confirmed, or at least up to some peak rank. For the really popular songs, songs with a rank between 1 and 50, it is clear that they stay on the chart for weeks than less popular songs do. We test this by performing a Pearsons correlation test. The test returned a correlation estimate of -0.3525126. This demonstrates a negative correlation since a higher peak rank is represented by a low numerical estimate. Furthermore, a “For loop” was written to test every numerical feature against another. This returned energy/loudness correlation of 0.69 p<2.2e-16 and an Energy/acousticness correlation of -0.59 p<2.2e-16.
+
+
+
