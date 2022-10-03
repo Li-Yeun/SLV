@@ -1,9 +1,11 @@
 ---
 title: "Supervised Learning and Visualisation"
-subtitle: "Assignment 1"
 author: "Abdool Al-Khaledi, Amalia Tsakali, Li-Yeun Xu, Willem van Veluw"
 date: "2022-09-19"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
+subtitle: Assignment 1
 ---
 
 ## Introduction
@@ -74,7 +76,7 @@ key_bar <-
   ylim(0,120) +
   geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
   theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
-  labs(title  = "                                                            Figure 1")
+  labs(title = "Figure 1", subtitle = "Barplot showing the frequencies of the key-signature feature.")
 
 
 key_bar
@@ -93,7 +95,7 @@ time_signature_bar <-
   ylim(0, 625) +
   geom_text(aes(label = ..count..), stat = "count", vjust = -1) +
   theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
-  labs(title  = "                                                            Figure 2")
+  labs(title  = "Figure 2", subtitle = "Barplot showing the frequencies of the time signatures.")
 
 time_signature_bar
 ```
@@ -116,7 +118,8 @@ rank_weeks <-
   geom_point() +
   geom_smooth(colour = "red", se=FALSE) +
   theme_minimal() +
-  labs(title  = "                                                       Figure 3")
+  labs(title  = "Figure 3", subtitle = "Scatterplot showing the relationship between peak rank and weeks on chart feature.")
+  
 
 rank_weeks
 ```
@@ -129,7 +132,7 @@ data %>%
   xlim(-15, 0) +
   stat_cor(colour = "#0000FF") +
   theme_minimal() +
-  labs(title  = "                                                       Figure 4")
+  labs(title  = "Figure 4", subtitle = "Scatterplot showing the relationship between the energy and loudness feature.")
 ```
 
 ```{r, echo=FALSE}
@@ -137,7 +140,7 @@ ggplot(data,aes(y=energy,x=weeks_on_chart))+
   geom_point() +
   stat_cor(label.x = 0.4, label.y = 0.1)+
   facet_wrap(~key) +
-  labs(x="Weeks on Chart", title  = "                                                       Figure 5") + 
+  labs(title  = "Figure 5", subtitle = "Scatterplots showing the relationship between the energy and weeks on chart feature.\nThe facet_wrap() function is used on the key-signature feature.") +
   theme_minimal()
 ```
 
@@ -146,7 +149,7 @@ data%>%
   filter(peak_rank<10) %>% 
   ggplot(aes(x=weeks_on_chart, fill=mode))+
   geom_density(alpha=0.3)+
-  labs(x="Weeks on Chart", title  = "                                                   Figure 6") + 
+  labs(title  = "Figure 6", subtitle = "Density plot showing the distribution of the weeks on chart feature, categorized by the mode feature.") +
   theme_minimal()
 ```
 
