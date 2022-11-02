@@ -1,0 +1,224 @@
+---
+title: "Supervised Learning and Visualisation"
+subtitle: "Assignment 2: Prediction models"
+author: "Abdool Al-Khaledi, Amalia Tsakali and Willem van Veluw"
+date: "`r Sys.Date()`"
+output: html_document
+---
+<style>
+todo { opacity: 0.35; }
+</style>
+
+# Introduction
+### The dataset
+```{r, include = FALSE}
+library(tidyverse)
+library(cowplot)
+library(mice)
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(pROC)
+library(mlbench)
+data("PimaIndiansDiabetes2")
+
+set.seed(45)
+```
+
+### Missing values
+When exploring the dataset, we observed that there are quite some missing values in the dataset. The number of missing values per variable is computed below. We see that the variable `insulin` contains a lot of missing values: almost 50% of the observations has no record for insulin. We can therefore not simply throw away all rows with a missing value, it is a too large fraction of the dataset. We have to deal with the missing values in a different way.
+
+```{r, echo = FALSE}
+nr_nas <- 1:9
+names(nr_nas) <- colnames(PimaIndiansDiabetes2)
+for(i in 1:ncol(PimaIndiansDiabetes2)){
+  nr_nas[i] <- sum(is.na(PimaIndiansDiabetes2[,i]))
+}
+"Number of missing values in the dataset:"
+nr_nas[-9]
+```
+Let us first inspect the missing data in a little bit more detail. From the missing value pattern plot we see below, we can draw equivalent conclusions as from the table above. The variable `insulin` is the most problematic one, followed by `triceps` and `pressure`. There are 652 missing values in total. 
+
+```{r, echo = FALSE}
+mice::md.pattern(PimaIndiansDiabetes2)
+```
+We decided to work around the problem of missing values by imputing them: the package `mice` has a nice function for this. Credits of this approach go to Gerko Vink who pointed us in the right direction and helped us a lot by providing some example code. After imputing the missing values, there are none left as can be seen from the table below. We can now start fitting our models and make predictions!
+
+```{r}
+data_complete <- PimaIndiansDiabetes2 %>% 
+  mice(m = 1, maxit = 100, printFlag = FALSE) %>% 
+  complete()
+```
+
+```{r, echo = FALSE}
+nr_nas_complete <- 1:9
+names(nr_nas_complete) <- colnames(data_complete)
+for(i in 1:ncol(data_complete)){
+  nr_nas_complete[i] <- sum(is.na(data_complete[,i]))
+}
+"Missing values in the dataset after impution:"
+nr_nas_complete[-9]
+```
+
+### Divide dataset
+Before we start training our models we divide the dataset into a training and a test set. For the training set we will use 80% of the data (614 observations) and the test set will be formed by the remaining 20% (154 observations).  
+
+```{r}
+data_complete <- data_complete %>% 
+  mutate(Set = sample( c(rep("Train", 614), rep("Test", 154))))
+
+data_train <- data_complete %>% filter(Set == "Train")
+data_test <- data_complete %>% filter(Set == "Test")
+```
+
+### Models
+<todo> 
+(1) Write something about the models we will consider: simple (logistic regression and classification tree) and complex (random forest). Stress that we will use a cross-validation to train the random forest.  
+(2) Write something about the way we will compare the performance of our models. State the metrics we will compute from the confusion matrix, say that we also look at AUC and we will ultimately use a McNemar's test. Maybe give a short explanation of the McNemar test, how it works. <todo><br>
+
+# Simple model: Logistic regression
+### Theory
+Logistic Regression (LR) is a classification method that models the probability of an observation by the logit-link function. The probability of observation $\vec{x}$ to belong at class 1 ($y=1$) is modelled as
+$$
+  P(y = 1|x) = \frac{1}{1+exp(-\vec{\beta}\bullet\vec{x})},
+$$
+where $\vec{\beta}\bullet\vec{x}=\beta_0+\beta_1\cdot x_1+...+\beta_J\cdot x_J$. Then it follows that class 0 has a probability of
+$$
+\begin{align*}
+  P(y = 0|x) & = 1-P(y=1|x)\\ 
+    & = \frac{1}{1+exp(\vec{\beta}\bullet\vec{x})}.
+\end{align*}
+$$
+When a LR model is fit, the coefficients $\vec{\beta}=\beta_0,...,\beta_J$ are estimated. With these estimates in place, the class of a (new) observation is predicted as the one with largest probability.  
+For a simple prediction rule, the log-odds form a nice tool. The log-odds are defined as
+$$
+\begin{align*}
+  \log(\frac{P(y=1|x)}{P(y=0|x)}) & = \log(exp(\vec{\beta}\bullet\vec{x}))\\
+  & = \vec{\beta}\bullet\vec{x}.
+\end{align*}
+$$
+Now, when the probability of class 1 is largest, the log-odds are positive. In the other case, where the probability of class 0 is largest, the log-odds are negative. This induces a simple prediction rule for LR: predict class 1 if $\vec{\beta}\bullet\vec{x}\geq0$, and class 0 otherwise.
+
+### Training Results
+We have trained a LR model with all five variables as predictors. The estimated coefficients can be seen below. From the estimated coefficients we see that all predictors have a positive influence of the class, i.e. if either variable increases, the probability of the observation being of class 1 increases as well. 
+```{r, include = FALSE}
+lr_mod <- glm(formula = diabetes ~.,
+              data = data_train %>% select(-Set),
+              family = binomial)
+```
+```{r, echo = FALSE}
+lr_mod
+```
+To visualise the influence of a certain variable on the prediction probability, we took the following procedure.
+
+(1) To investigate the influence of one variable, we fix all other variables at their mean.
+(2) Create a sequence of 1000 points between the minimum and maximum observed value of the variable of interest.
+(3) Compute the prediction probability for every point: we obtain 1000 prediction probabilities.
+
+<todo>Write something about the plots. <todo><br>
+
+```{r, include = FALSE}
+means <- data_train %>% 
+  select(-diabetes,-Set) %>% 
+  apply(MARGIN = 2, FUN = mean)
+
+plot_data <- list()
+for(i in 1:8){
+  x <- seq(min(data_train[,i]), max(data_train[,i]), length.out = 1000)
+  data <- matrix( means[-i] %>% rep(each = 1000), nrow = 1000)
+  data <- data.frame(x,data)
+  colnames(data) <- c(names(means[i]), names(means[-i]))
+  
+  y <- predict(lr_mod, newdata = data, type = "response")
+  
+  plot_data[[i]] <- data.frame(x,y)
+}
+
+plot_pregnant <- plot_data[[1]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "pregnant",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+
+plot_glucose <- plot_data[[2]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "glucose",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+
+plot_pressure <- plot_data[[3]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "pressure",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+
+plot_triceps <- plot_data[[4]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "triceps",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+
+plot_insulin <- plot_data[[5]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "insulin",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+
+plot_mass <- plot_data[[6]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "mass",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+
+plot_pedigree <- plot_data[[7]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "pedigree",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+
+plot_age <- plot_data[[8]] %>% 
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  labs(x = "age",
+       y = "probability") +
+  ylim(0,1) +
+  theme_minimal()
+```
+
+```{r, echo = FALSE}
+plot_grid(plot_pregnant, plot_glucose, plot_pressure,
+          plot_triceps, plot_insulin, plot_mass,
+          plot_pedigree, plot_age)
+```
+
+### Performance Results
+To be able to compare the performance of LR with other models, we construct the confusion matrix of the test data. From this confusion matrix, we compute the metrics that we think are most important.
+
+```{r, echo = FALSE}
+pred_prob_lr <- predict(lr_mod, newdata = data_test, type = "response")
+pred_lr <- factor(pred_prob_lr > .5, labels = c("neg", "pos"))
+
+lr_confmat <- table( true = data_test$diabetes, predicted = pred_lr)
+lr_confmat
+```
+
+
+# Simple model: Decision Tree
+
+```{r}
+
+```
