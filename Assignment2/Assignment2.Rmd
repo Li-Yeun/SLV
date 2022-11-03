@@ -5,10 +5,6 @@ author: "Abdool Al-Khaledi, Amalia Tsakali and Willem van Veluw"
 date: "`r Sys.Date()`"
 output: html_document
 ---
-<style>
-todo { opacity: 0.35; }
-</style>
-
 # Introduction
 ### The dataset
 ```{r, include = FALSE}
@@ -60,24 +56,29 @@ for(i in 1:ncol(data_complete)){
 nr_nas_complete[-9]
 ```
 
-### Divide dataset
-Before we start training our models we divide the dataset into a training and a test set. For the training set we will use 80% of the data (614 observations) and the test set will be formed by the remaining 20% (154 observations).  
+### Creating training and testing sets
+Before we start training our models we divide the dataset into a training and a test set. For the training set we will use 80% of the data (614 observations) and the test set will be formed by the remaining 20% (154 observations). For training the trees (see next section) we will perform a 10-fold cross-validation. Hence, the 614 training observations will be divided in six folds of 61 observations and four folds of 62 observations.
 
 ```{r}
 data_complete <- data_complete %>% 
   mutate(Set = sample( c(rep("Train", 614), rep("Test", 154))))
 
-data_train <- data_complete %>% filter(Set == "Train")
+data_train <- data_complete %>% 
+  filter(Set == "Train") %>% 
+  mutate(Fold = sample( c(rep(1:6, each = 61), rep(7:10, each = 62))))
 data_test <- data_complete %>% filter(Set == "Test")
 ```
 
-### Models
-<todo> 
-(1) Write something about the models we will consider: simple (logistic regression and classification tree) and complex (random forest). Stress that we will use a cross-validation to train the random forest.  
-(2) Write something about the way we will compare the performance of our models. State the metrics we will compute from the confusion matrix, say that we also look at AUC and we will ultimately use a McNemar's test. Maybe give a short explanation of the McNemar test, how it works. <todo><br>
+### Models and Metrics
+<p style="color:red;">
+Write something about the models we will consider: simple (logistic regression and classification tree) and complex (random forest). Stress that we will use a cross-validation to train the tree and the random forest. </p>
+
+<p style="color:red;">
+Write something about the way we will compare the performance of our models. State the metrics we will compute from the confusion matrix, say that we also look at AUC and we will ultimately use a McNemar's test. Maybe give a short explanation of the McNemar test, how it works.
+</p>
 
 # Simple model: Logistic regression
-### Theory
+### Approach
 Logistic Regression (LR) is a classification method that models the probability of an observation by the logit-link function. The probability of observation $\vec{x}$ to belong at class 1 ($y=1$) is modelled as
 $$
   P(y = 1|x) = \frac{1}{1+exp(-\vec{\beta}\bullet\vec{x})},
@@ -100,10 +101,10 @@ $$
 Now, when the probability of class 1 is largest, the log-odds are positive. In the other case, where the probability of class 0 is largest, the log-odds are negative. This induces a simple prediction rule for LR: predict class 1 if $\vec{\beta}\bullet\vec{x}\geq0$, and class 0 otherwise.
 
 ### Training Results
-We have trained a LR model with all five variables as predictors. The estimated coefficients can be seen below. From the estimated coefficients we see that all predictors have a positive influence of the class, i.e. if either variable increases, the probability of the observation being of class 1 increases as well. 
+We have trained a LR model with all five variables as predictors. The estimated coefficients can be seen below. From the estimated coefficients we see that all predictors have a positive influence of the class, i.e. if either variable increases, the probability of the observation being of class 1 increases as well.
 ```{r, include = FALSE}
 lr_mod <- glm(formula = diabetes ~.,
-              data = data_train %>% select(-Set),
+              data = data_train %>% select(-Set, -Fold),
               family = binomial)
 ```
 ```{r, echo = FALSE}
@@ -115,7 +116,9 @@ To visualise the influence of a certain variable on the prediction probability, 
 (2) Create a sequence of 1000 points between the minimum and maximum observed value of the variable of interest.
 (3) Compute the prediction probability for every point: we obtain 1000 prediction probabilities.
 
-<todo>Write something about the plots. <todo><br>
+<p style="color:red;">
+Say something about the plots. Note that all variables are rather large, whereas `pedigree` is a decimal value.
+</p>
 
 ```{r, include = FALSE}
 means <- data_train %>% 
@@ -206,19 +209,90 @@ plot_grid(plot_pregnant, plot_glucose, plot_pressure,
 ```
 
 ### Performance Results
-To be able to compare the performance of LR with other models, we construct the confusion matrix of the test data. From this confusion matrix, we compute the metrics that we think are most important.
+To be able to compare the performance of LR with other models, we construct the confusion matrix of predictions on the test data. From this confusion matrix, we compute the metrics that we think are most important.
 
 ```{r, echo = FALSE}
-pred_prob_lr <- predict(lr_mod, newdata = data_test, type = "response")
-pred_lr <- factor(pred_prob_lr > .5, labels = c("neg", "pos"))
+lr_pred_probs <- predict(lr_mod, newdata = data_test, type = "response")
+lr_preds <- factor(lr_pred_probs > .5, labels = c("neg", "pos"))
 
-lr_confmat <- table( true = data_test$diabetes, predicted = pred_lr)
+lr_confmat <- table(True = data_test$diabetes, Predicted = lr_preds)
 lr_confmat
 ```
 
 
-# Simple model: Decision Tree
+# Simple model: Classification Tree
+### Approach
+The second model that we will consider is the classification tree. The idea of such a tree is to recursively make splits based on the variables. Each split should make the observations within one of the resulting groups as similar as possible. The prediction rule of the tree is defined as "majority vote": within a leaf node, determine the class with maximal frequency among the observation within that node. If two or more classes have equal frequency, then choose uniformly random.  
+An important notion to make when considering classification trees is the tree complexity. A classification tree has a high complexity when it makes a lot of splits, resulting in a large/deep tree with many leaf nodes that contain few observations. In that case, there is a high variance among the predictions. To prevent this, one can *prune* the tree: stop splitting when some condition is met. For instance, one could
 
-```{r}
+- stop splitting when the number of observations in a node is below some threshold $n_{min}$.
+- stop splitting when the complexity of the tree is larger then some threshold $cp$.
 
+Note that there are more ways to prune a tree (or complexity parameters to specify). A list of all complexity parameters and their default values can be found in the documentation of `rpart.control`. Note the default values $n_{min} = 20$ and $cp = 0.01$.  
+We will tune the *hyperparameters* $n_{min}$ and $cp$ by means of the 10-fold cross-validation as specified earlier. The metric of performance that we will use is the accuracy. For the possible values of the hyperparameters, we consider $56$ combinations:
+
+- $n_{min}\in\{50\cdot i|i=0,...,6\}$, as $n_{min}=0$ resembles the full grown tree and $n_{min}=300$ gives a tree with just one split (with all other hyperparameters equal to their default value).
+- $cp\in\{0.01\cdot i|i=0,...,7\}$, as $cp=0$ resembles the full grown tree and $cp=0.07$ gives a tree with just one split (with all other hyperparameters equal to their default value).
+
+### Training Results
+The results of the 10-fold cross-validation can be found below. For the implementation of the cross-validation, please read the .Rmd file. From the table we can read that the tree with $n_{min}=50$ and $cp = 0$ performs best: its mean accuracy over the folds equals approximately 0.76. With the hyperparameters set, we fit the classification tree again on the entire dataset. The resulting tree can be found below the table.
+
+
+```{r, include = FALSE}
+nmins <- seq(0,300, by = 50)
+cps <- seq(0,0.07, by = 0.01)
+
+accuracies <- matrix(nrow = length(nmins), ncol = length(cps))
+colnames(accuracies) <- paste("cp =", as.character(cps))
+rownames(accuracies) <- paste("n_min =", as.character(nmins))
+
+for(i in 1:length(nmins)){
+  for(j in 1:length(cps)){
+    mean_acc <- 0
+    for(k in 1:10){
+      train <- data_train %>% filter(Fold != k) %>% select(-Set, -Fold)
+      val <- data_train %>% filter(Fold == k)
+      ctree <- rpart(diabetes ~.,
+                     data = train,
+                     control = rpart.control(minsplit = nmins[i], cp = cps[j]))
+      preds <- predict(ctree, newdata = val, type = "class")
+      acc <- sum(val$diabetes == preds)/nrow(val)
+      mean_acc <- mean_acc + acc/10
+    }
+    accuracies[i,j] <- mean_acc
+  }
+}
 ```
+
+```{r, echo = FALSE}
+"Mean accuracy over 10 folds. The rows represent n_min, the columns represent cp."
+accuracies
+
+hyperparams <- which(accuracies == max(accuracies), arr.ind = TRUE)
+ctree_mod <- rpart(diabetes ~.,
+                   data = data_train %>% select(-Set, -Fold),
+                   control = rpart.control(minsplit = (hyperparams[1]-1)*50, cp = (hyperparams[2]-1)*0.01))
+rpart.plot(ctree_mod)
+```
+
+It is interesting to see that the classification tree does multiple splits on `glucose`. It seems that this variable contains a lot of helpful information. We see that idea confirmed by the computed variable importance, see the barplot below.  
+The second thing that we noted is the following. Although `insulin` is the second most important variable, the tree does not perform a split on that variable. We are unsure why this happens.  
+The last interesting notion is that the tree predicts an observation with `pregnant` greater than 7 and `glucose` between 96 and 124 as *diabetes*. We see that the leaf in which this observation ends up contains 8% of the training observations (about 49 observations). Among this 49 observations, there is a slight majority with class *diabetes*.
+
+```{r, echo = FALSE}
+data.frame(Variable = names(ctree_mod$variable.importance),
+                           Importance = ctree_mod$variable.importance) %>% 
+  ggplot(aes(x = Variable, y = Importance, fill = Variable)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(title = "Variable importance for the classification tree.") +
+  theme_minimal()
+```
+
+### Performance results
+To be able to compare the performance of LR with other models, we construct the confusion matrix of predictions on the test data. From this confusion matrix, we compute the metrics that we think are most important.
+
+```{r, echo = FALSE}
+ctree_preds <- predict(ctree_mod, newdata = data_test, type = "class")
+
+ctree_confmat <- table(True = data_test$diabetes, Predicted = ctree_preds)
+ctree_confmat
