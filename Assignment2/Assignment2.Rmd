@@ -80,23 +80,7 @@ PimaIndiansDiabetes2 %>%
   scale_fill_brewer(palette = "Paired") +
   theme_minimal()
 
-data_complete %>%
-  pivot_longer(where(is.numeric)) %>%
-  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
-  geom_histogram(alpha = 0.8) +
-  facet_wrap(~name, scales = "free") +
-  scale_color_brewer(palette = "Paired") +
-  scale_fill_brewer(palette = "Paired") +
-  theme_minimal()
 
-PimaIndiansDiabetes2 %>%
-  pivot_longer(where(is.numeric)) %>%
-  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
-  geom_histogram(alpha = 0.8) +
-  facet_wrap(~name, scales = "free") +
-  scale_color_brewer(palette = "Paired") +
-  scale_fill_brewer(palette = "Paired") +
-  theme_minimal()
 ```
 Looking at the density plots, as well as the summary statistics, we can conclude that imputing the missing values has not altered the distribution of our data. So we believe it is safe to use the imputed dataset from this point on.
 
@@ -163,6 +147,11 @@ To visualise the influence of a certain variable on the prediction probability, 
 <p style="color:red;">
 Say something about the plots. Note that all variables are rather large, whereas `pedigree` is a decimal value.
 </p>
+
+
+These plots are in accordance with the coefficient values we extracted from the model. Namely, we see see a decrease in probability when the values of predictors with negative coefficients increase, and an increase for the predictors that have a positive coefficient.
+We also see that predictors whose coefficient is high in absolute value, like pedigree, display a detectable change in probability inside a small range of values. And vice versa, predictors with a low absolute value coefficient, like insulin, need a larger increase in their value for a visible change in probability. This becomes apparent by looking at the x axes. (Note that x axis ranges from 0 to 2.5). 
+One surprising thing about these plots is that we see a linear relationship between the probability and many predictors, when we would expect a sigmoid curve, similar to the one for glucose.
 
 ```{r, include = FALSE}
 means <- data_train %>% 
@@ -382,3 +371,9 @@ ggroc(roc_ctree) + theme_minimal() + labs(title = "Classification tree")
 
 roc_ctree
 ```
+
+###Comparison between models
+```{r}
+
+```
+
