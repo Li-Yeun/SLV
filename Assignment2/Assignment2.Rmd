@@ -55,6 +55,50 @@ for(i in 1:ncol(data_complete)){
 "Missing values in the dataset after impution:"
 nr_nas_complete[-9]
 ```
+###Summary Statistics before and after imputation
+To determine whether the imputation has altered the properties of our dataset we will extract some summary statistics, and create some exploratory plots concerning the distribution of each value in healthy and diseased individuals. 
+```{r}
+summary(PimaIndiansDiabetes2)
+
+summary(data_complete)
+
+data_complete %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
+  geom_density(alpha = 0.8) +
+  facet_wrap(~name, scales = "free") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_minimal()
+
+PimaIndiansDiabetes2 %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
+  geom_density(alpha = 0.8) +
+  facet_wrap(~name, scales = "free") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_minimal()
+
+data_complete %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
+  geom_histogram(alpha = 0.8) +
+  facet_wrap(~name, scales = "free") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_minimal()
+
+PimaIndiansDiabetes2 %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
+  geom_histogram(alpha = 0.8) +
+  facet_wrap(~name, scales = "free") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_minimal()
+```
+Looking at the density plots, as well as the summary statistics, we can conclude that imputing the missing values has not altered the distribution of our data. So we believe it is safe to use the imputed dataset from this point on.
 
 ### Creating training and testing sets
 Before we start training our models we divide the dataset into a training and a test set. For the training set we will use 80% of the data (614 observations) and the test set will be formed by the remaining 20% (154 observations). For training the trees (see next section) we will perform a 10-fold cross-validation. Hence, the 614 training observations will be divided in six folds of 61 observations and four folds of 62 observations.
