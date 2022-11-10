@@ -9,6 +9,7 @@ output: html_document
 ### The dataset
 ```{r, include = FALSE}
 library(tidyverse)
+library(caret)
 library(cowplot)
 library(mice)
 library(rpart)
@@ -16,6 +17,7 @@ library(rpart.plot)
 library(randomForest)
 library(pROC)
 library(mlbench)
+library(randomForest)
 data("PimaIndiansDiabetes2")
 
 set.seed(45)
@@ -340,7 +342,120 @@ data.frame(Variable = names(ctree_mod$variable.importance),
   labs(title = "Variable importance for the classification tree.") +
   theme_minimal()
 ```
+# Complex Model: Random Forest 
+### Approach
 
+
+```{R}
+# Define the control
+trControl <- trainControl(method = "cv",
+    number = 10,
+    search = "grid")
+
+#try different mtry 
+tuneGrid <- expand.grid(.mtry = c(1: 8))
+rf_mtry <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin + mass
+    + pedigree + age,
+    data = data_train,
+    method = "rf",
+    metric = "Accuracy",
+    tuneGrid = tuneGrid,
+    trControl = trControl,
+    importance = TRUE)
+
+#store best mtry
+best_mtry <- rf_mtry$bestTune$mtry 
+best_mtry
+
+#try different maxnode
+store_maxnode <- list()
+tuneGrid <- expand.grid(.mtry = best_mtry)
+for (maxnodes in c(5: 15)) {
+    rf_maxnode <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
+    data = data_train,
+        method = "rf",
+        metric = "Accuracy",
+        tuneGrid = tuneGrid,
+        trControl = trControl,
+        importance = TRUE,
+        maxnodes = maxnodes)
+    current_iteration <- toString(maxnodes)
+    store_maxnode[[current_iteration]] <- rf_maxnode
+}
+results_mtry <- resamples(store_maxnode)
+summary(results_mtry)
+
+#Try a longer range.
+store_maxnode <- list()
+tuneGrid <- expand.grid(.mtry = best_mtry)
+for (maxnodes in c(15: 30)) {
+    rf_maxnode <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
+    data = data_train,
+        method = "rf",
+        metric = "Accuracy",
+        tuneGrid = tuneGrid,
+        trControl = trControl,
+        importance = TRUE,
+        maxnodes = maxnodes)
+    key <- toString(maxnodes)
+    store_maxnode[[key]] <- rf_maxnode
+}
+results_node <- resamples(store_maxnode)
+summary(results_node)
+
+#search for best ntree 
+store_maxtrees <- list()
+for (ntree in c(250, 300, 350, 400, 450, 500, 550, 600, 800, 1000, 2000)) {
+      rf_maxtrees <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
+      data = data_train,
+      method = "rf",
+      metric = "Accuracy",
+      tuneGrid = tuneGrid,
+      trControl = trControl,
+      importance = TRUE,
+      maxnodes = 18,
+      ntree = ntree)
+  key <- toString(ntree)
+  store_maxtrees[[key]] <- rf_maxtrees
+}
+results_tree <- resamples(store_maxtrees)
+summary(results_tree)
+
+#search for best nodesize 
+store_nodesize <- list()
+tuneGrid <- expand.grid(.mtry = best_mtry)
+for (nodesize in c(10: 30)) {
+      rf_nodesize <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
+      data = data_train,
+      method = "rf",
+      metric = "Accuracy",
+      tuneGrid = tuneGrid,
+      trControl = trControl,
+      importance = TRUE,
+      nodesize = nodesize)
+    current_iteration <- toString(nodesize)
+    store_nodesize[[current_iteration]] <- rf_nodesize
+}
+results_mtry <- resamples(store_nodesize)
+summary(results_mtry)
+
+#Train the forest
+fit_rf <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass     + pedigree + age,
+    data = data_train,
+    method = "rf",
+    metric = "Accuracy",
+    tuneGrid = tuneGrid,
+    trControl = trControl,
+    importance = TRUE,
+    ntree = 600,
+    nodesize = 23,
+    maxnodes = 18)
+
+#Evaluate
+prediction_rf <- predict(fit_rf, newdata= data_test)
+rf_matrix <- confusionMatrix(prediction_rf, data_test$diabetes)
+rf_matrix
+```
 ### Performance results
 To be able to compare the performance of LR with other models, we construct the confusion matrix of predictions on the test data. From this confusion matrix, we compute the metrics that we think are most important.
 
