@@ -217,6 +217,26 @@ lr_preds <- factor(lr_pred_probs > .5, labels = c("neg", "pos"))
 
 lr_confmat <- table(True = data_test$diabetes, Predicted = lr_preds)
 lr_confmat
+#calculate the most important metrics
+TN <- lr_confmat[1, 1]
+FN <- lr_confmat[2, 1]
+FP <- lr_confmat[1, 2]
+TP <- lr_confmat[2, 2]
+
+tibble(
+  Acc = (TP + TN) / sum(lr_confmat),
+  TPR = TP / (TP + FN),
+  TNR = TN / (TN + FP),
+  FPR = FP / (TN + FP),
+  PPV = TP / (TP + FP),
+  NPV = TN / (TN + FN)
+)
+
+#ROC
+roc_lr <- roc(data_test$diabetes, lr_pred_probs)
+ggroc(roc_lr) + theme_minimal() + labs(title = "Logistic Regression")
+
+roc_lr
 ```
 
 
@@ -296,3 +316,25 @@ ctree_preds <- predict(ctree_mod, newdata = data_test, type = "class")
 
 ctree_confmat <- table(True = data_test$diabetes, Predicted = ctree_preds)
 ctree_confmat
+#calculate the most important metrics
+TN_tree <- ctree_confmat[1, 1]
+FN_tree <- ctree_confmat[2, 1]
+FP_tree <- ctree_confmat[1, 2]
+TP_tree <- ctree_confmat[2, 2]
+
+tibble(
+  Acc_tree = (TP_tree + TN_tree) / sum(ctree_confmat),
+  TPR_tree = TP_tree / (TP_tree + FN_tree),
+  TNR_tree = TN_tree / (TN_tree + FP_tree),
+  FPR_tree = FP_tree / (TN_tree + FP_tree),
+  PPV_tree = TP_tree / (TP_tree + FP_tree),
+  NPV_tree = TN_tree / (TN_tree + FN_tree)
+)
+#ROC
+ctree_preds_prob <- predict(ctree_mod, newdata = data_test)
+class(ctree_preds_prob)
+roc_ctree <- roc(data_test$diabetes, ctree_preds_prob[,2])
+ggroc(roc_ctree) + theme_minimal() + labs(title = "Classification tree")
+
+roc_ctree
+```
