@@ -17,7 +17,6 @@ library(rpart.plot)
 library(randomForest)
 library(pROC)
 library(mlbench)
-library(randomForest)
 data("PimaIndiansDiabetes2")
 
 set.seed(45)
@@ -57,21 +56,15 @@ for(i in 1:ncol(data_complete)){
 "Missing values in the dataset after impution:"
 nr_nas_complete[-9]
 ```
-###Summary Statistics before and after imputation
+
+### Summary statistics
 To determine whether the imputation has altered the properties of our dataset we will extract some summary statistics, and create some exploratory plots concerning the distribution of each value in healthy and diseased individuals. 
 ```{r}
+"The dataset before imputation"
 summary(PimaIndiansDiabetes2)
 
+"The dataset after imputation"
 summary(data_complete)
-
-data_complete %>%
-  pivot_longer(where(is.numeric)) %>%
-  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
-  geom_density(alpha = 0.8) +
-  facet_wrap(~name, scales = "free") +
-  scale_color_brewer(palette = "Paired") +
-  scale_fill_brewer(palette = "Paired") +
-  theme_minimal()
 
 PimaIndiansDiabetes2 %>%
   pivot_longer(where(is.numeric)) %>%
@@ -80,6 +73,19 @@ PimaIndiansDiabetes2 %>%
   facet_wrap(~name, scales = "free") +
   scale_color_brewer(palette = "Paired") +
   scale_fill_brewer(palette = "Paired") +
+  labs(title = "The dataset before imputation.",
+       subtitle = "Note that 652 rows have been ommited because of the missing values.") +
+  theme_minimal()
+
+data_complete %>%
+  pivot_longer(where(is.numeric)) %>%
+  ggplot(aes(x = value, col = diabetes, fill = diabetes)) +
+  geom_density(alpha = 0.8) +
+  facet_wrap(~name, scales = "free") +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  labs(title = "The dataset after imputation.",
+       subtitle = "No rows are omitted, since there are no missing values anymore.") +
   theme_minimal()
 
 
@@ -145,11 +151,6 @@ To visualise the influence of a certain variable on the prediction probability, 
 (1) To investigate the influence of one variable, we fix all other variables at their mean.
 (2) Create a sequence of 1000 points between the minimum and maximum observed value of the variable of interest.
 (3) Compute the prediction probability for every point: we obtain 1000 prediction probabilities.
-
-<p style="color:red;">
-Say something about the plots. Note that all variables are rather large, whereas `pedigree` is a decimal value.
-</p>
-
 
 These plots are in accordance with the coefficient values we extracted from the model. Namely, we see see a decrease in probability when the values of predictors with negative coefficients increase, and an increase for the predictors that have a positive coefficient.
 We also see that predictors whose coefficient is high in absolute value, like pedigree, display a detectable change in probability inside a small range of values. And vice versa, predictors with a low absolute value coefficient, like insulin, need a larger increase in their value for a visible change in probability. This becomes apparent by looking at the x axes. (Note that x axis ranges from 0 to 2.5). 
@@ -342,120 +343,7 @@ data.frame(Variable = names(ctree_mod$variable.importance),
   labs(title = "Variable importance for the classification tree.") +
   theme_minimal()
 ```
-# Complex Model: Random Forest 
-### Approach
 
-
-```{R}
-# Define the control
-trControl <- trainControl(method = "cv",
-    number = 10,
-    search = "grid")
-
-#try different mtry 
-tuneGrid <- expand.grid(.mtry = c(1: 8))
-rf_mtry <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin + mass
-    + pedigree + age,
-    data = data_train,
-    method = "rf",
-    metric = "Accuracy",
-    tuneGrid = tuneGrid,
-    trControl = trControl,
-    importance = TRUE)
-
-#store best mtry
-best_mtry <- rf_mtry$bestTune$mtry 
-best_mtry
-
-#try different maxnode
-store_maxnode <- list()
-tuneGrid <- expand.grid(.mtry = best_mtry)
-for (maxnodes in c(5: 15)) {
-    rf_maxnode <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
-    data = data_train,
-        method = "rf",
-        metric = "Accuracy",
-        tuneGrid = tuneGrid,
-        trControl = trControl,
-        importance = TRUE,
-        maxnodes = maxnodes)
-    current_iteration <- toString(maxnodes)
-    store_maxnode[[current_iteration]] <- rf_maxnode
-}
-results_mtry <- resamples(store_maxnode)
-summary(results_mtry)
-
-#Try a longer range.
-store_maxnode <- list()
-tuneGrid <- expand.grid(.mtry = best_mtry)
-for (maxnodes in c(15: 30)) {
-    rf_maxnode <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
-    data = data_train,
-        method = "rf",
-        metric = "Accuracy",
-        tuneGrid = tuneGrid,
-        trControl = trControl,
-        importance = TRUE,
-        maxnodes = maxnodes)
-    key <- toString(maxnodes)
-    store_maxnode[[key]] <- rf_maxnode
-}
-results_node <- resamples(store_maxnode)
-summary(results_node)
-
-#search for best ntree 
-store_maxtrees <- list()
-for (ntree in c(250, 300, 350, 400, 450, 500, 550, 600, 800, 1000, 2000)) {
-      rf_maxtrees <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
-      data = data_train,
-      method = "rf",
-      metric = "Accuracy",
-      tuneGrid = tuneGrid,
-      trControl = trControl,
-      importance = TRUE,
-      maxnodes = 18,
-      ntree = ntree)
-  key <- toString(ntree)
-  store_maxtrees[[key]] <- rf_maxtrees
-}
-results_tree <- resamples(store_maxtrees)
-summary(results_tree)
-
-#search for best nodesize 
-store_nodesize <- list()
-tuneGrid <- expand.grid(.mtry = best_mtry)
-for (nodesize in c(10: 30)) {
-      rf_nodesize <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass + pedigree + age,
-      data = data_train,
-      method = "rf",
-      metric = "Accuracy",
-      tuneGrid = tuneGrid,
-      trControl = trControl,
-      importance = TRUE,
-      nodesize = nodesize)
-    current_iteration <- toString(nodesize)
-    store_nodesize[[current_iteration]] <- rf_nodesize
-}
-results_mtry <- resamples(store_nodesize)
-summary(results_mtry)
-
-#Train the forest
-fit_rf <- train(diabetes ~ pregnant + glucose + pressure + triceps +insulin +       mass     + pedigree + age,
-    data = data_train,
-    method = "rf",
-    metric = "Accuracy",
-    tuneGrid = tuneGrid,
-    trControl = trControl,
-    importance = TRUE,
-    ntree = 600,
-    nodesize = 23,
-    maxnodes = 18)
-
-#Evaluate
-prediction_rf <- predict(fit_rf, newdata= data_test)
-rf_matrix <- confusionMatrix(prediction_rf, data_test$diabetes)
-rf_matrix
-```
 ### Performance results
 To be able to compare the performance of LR with other models, we construct the confusion matrix of predictions on the test data. From this confusion matrix, we compute the metrics that we think are most important.
 
@@ -485,6 +373,123 @@ roc_ctree <- roc(data_test$diabetes, ctree_preds_prob[,2])
 ggroc(roc_ctree) + theme_minimal() + labs(title = "Classification tree")
 
 roc_ctree
+```
+
+# Complex Model: Random Forest 
+### Approach
+<p style="color:red;">
+Say something about the idea behind random forests: many trees, bootstrap sample, splitting on subset of columns to reduce correlation between the trees. Als say something about the way we did our cross validation. </p>
+
+### Training results
+```{R}
+# Define the control
+trControl <- caret::trainControl(method = "cv",
+    number = 10,
+    search = "grid")
+
+#try different mtry 
+tuneGrid <- expand.grid(.mtry = 1: 8)
+rf_mtry <- train(diabetes ~ .,
+    data = data_train %>% select(-Set, -Fold),
+    method = "rf",
+    metric = "Accuracy",
+    tuneGrid = tuneGrid,
+    trControl = trControl,
+    importance = TRUE)
+
+#store best mtry
+best_mtry <- rf_mtry$bestTune$mtry 
+best_mtry
+
+#try different maxnode
+store_maxnode <- list()
+tuneGrid <- expand.grid(.mtry = best_mtry)
+for (maxnodes in 5: 15) {
+    rf_maxnode <- train(diabetes ~ .,
+    data = data_train %>% select(-Set, -Fold),
+        method = "rf",
+        metric = "Accuracy",
+        tuneGrid = tuneGrid,
+        trControl = trControl,
+        importance = TRUE,
+        maxnodes = maxnodes)
+    current_iteration <- toString(maxnodes)
+    store_maxnode[[current_iteration]] <- rf_maxnode
+}
+results_mtry <- resamples(store_maxnode)
+summary(results_mtry)
+
+#Try a longer range.
+store_maxnode <- list()
+tuneGrid <- expand.grid(.mtry = best_mtry)
+for (maxnodes in c(15: 30)) {
+    rf_maxnode <- train(diabetes ~ .,
+    data = data_train %>% select(-Set, -Fold),
+        method = "rf",
+        metric = "Accuracy",
+        tuneGrid = tuneGrid,
+        trControl = trControl,
+        importance = TRUE,
+        maxnodes = maxnodes)
+    key <- toString(maxnodes)
+    store_maxnode[[key]] <- rf_maxnode
+}
+results_node <- resamples(store_maxnode)
+summary(results_node)
+
+#search for best ntree 
+store_maxtrees <- list()
+ntrees <- c(250, 300, 350, 400, 450, 500, 550, 600, 800, 1000, 2000)
+for (ntree in ntrees) {
+      rf_maxtrees <- train(diabetes ~ .,
+      data = data_train %>% select(-Set, -Fold),
+      method = "rf",
+      metric = "Accuracy",
+      tuneGrid = tuneGrid,
+      trControl = trControl,
+      importance = TRUE,
+      maxnodes = 18,
+      ntree = ntree)
+  key <- toString(ntree)
+  store_maxtrees[[key]] <- rf_maxtrees
+}
+results_tree <- resamples(store_maxtrees)
+summary(results_tree)
+
+#search for best nodesize 
+store_nodesize <- list()
+tuneGrid <- expand.grid(.mtry = best_mtry)
+for (nodesize in 10: 30) {
+      rf_nodesize <- train(diabetes ~ .,
+      data = data_train %>% select(-Set, -Fold),
+      method = "rf",
+      metric = "Accuracy",
+      tuneGrid = tuneGrid,
+      trControl = trControl,
+      importance = TRUE,
+      nodesize = nodesize)
+    current_iteration <- toString(nodesize)
+    store_nodesize[[current_iteration]] <- rf_nodesize
+}
+results_mtry <- resamples(store_nodesize)
+summary(results_mtry)
+
+#Train the forest
+fit_rf <- train(diabetes ~ .,
+    data = data_train %>% select(-Set, -Fold),
+    method = "rf",
+    metric = "Accuracy",
+    tuneGrid = tuneGrid,
+    trControl = trControl,
+    importance = TRUE,
+    ntree = 600,
+    nodesize = 23,
+    maxnodes = 18)
+
+#Evaluate
+rf_preds <- predict(fit_rf, newdata= data_test)
+rf_matrix <- table(True = data_test$diabetes, Predicted = rf_preds)
+rf_matrix
 ```
 
 ###Comparison between models
