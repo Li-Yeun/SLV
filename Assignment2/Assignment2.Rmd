@@ -8,9 +8,6 @@ output: html_document
 # Introduction
 The ability to cater preventive, diagnostic and treatment measures on a case-by-case bases despite the inherent variability present in individuals has widely been considered as the holy grail of modern medicine. However, decoding this inherent variability across a wide range of possible attributes that might effect a persons health was a non-trivial issue, which has since been explored by leveraging machine learning algorithms. To that end, the purpose of this study is to investigate the performance of several supervised learning algorithms at a diagnostic (diabetic vs. non-diabetic) classification task. Specifically, we will asses the performance of a Logistic Regression model (linear classifier), a classification tree (non-linear classier) and a Random Forest (ensemble of non-linear classifiers) at this task. The accuracy values of the models will be compared via the McNemar test in order to assess the performance of the linear vs non-linear models. As well as to determine if the performance of the ensemble model was significantly different from the individual models. 
 
-```{r}
-dim(data_complete)
-```
 
 ### The dataset
 The data-set under analysis for the purpose of this study is the "Pima Indians Diabetes Database", downloaded from Kaggle. The data was originally curated by the U.S based National Institute of Diabetes and Digestive and Kidney Diseases. The data-set contains 768 observations with each observation representing an individual. Along with 9 columns, where 8 of these columns are predictor variables and the final "diabetes" column states the class label (positive or negative). The label here refers to whether or not a person is diabetic. It is important to note that the data set acquired from Kaggle is a subset of the NIH database. In this study, all the observations refer to females at least 21 years of age and of Pima Indian heritage.The predictor variables include: The number of times pregnant ('preg'),the diastolic blood pressure ('pressure'), tricep skin-fold thickness ('triceps'), serum-insulin ('insulin'), B.M.I ('mass'), a measure of diabetes presence in the pedigree chart ('pedigree'), and age in years ('age'). 
@@ -115,12 +112,7 @@ data_test <- data_complete %>% filter(Set == "Test")
 ```
 
 ### Models and Metrics
-<p style="color:red;">
-Write something about the models we will consider: simple (logistic regression and classification tree) and complex (random forest). Stress that we will use a cross-validation to train the tree and the random forest. </p>
-
-<p style="color:red;">
-Write something about the way we will compare the performance of our models. State the metrics we will compute from the confusion matrix, say that we also look at AUC and we will ultimately use a McNemar's test. Maybe give a short explanation of the McNemar test, how it works.
-</p>
+The McNemar test was employed in order to compare the performance of our classifiers via their accuracy score. This non-parametric statistical test receives input in the form of a 2x2 contingency table and is produced by tallying the number of correct and incorrect predictions made by the two models under investigation. Worth noting, The null hypothesis states that the row and column marginal frequencies of the contingency table are not statistically different. A positive McNemar test which denotes a significant difference is reached when the p-value is less than 0.05, at a 95 % confidence interval. First,we will compare the performance of the non-linear classifiers: Classification Tree and Random Forest against the logistic regression model. Furthermore, we will compare the performance of the single classification tree against the more complex Random forest algorithm. 
 
 # Simple model: Logistic regression
 ### Approach
@@ -380,23 +372,32 @@ ctree_preds_prob <- predict(ctree_mod, newdata = data_test)
 class(ctree_preds_prob)
 roc_ctree <- roc(data_test$diabetes, ctree_preds_prob[,2])
 ggroc(roc_ctree) + theme_minimal() + labs(title = "Classification tree")
-
 roc_ctree
 ```
 
 # Complex Model: Random Forest 
 ### Approach
-<p style="color:red;">
-Say something about the idea behind random forests: many trees, bootstrap sample, splitting on subset of columns to reduce correlation between the trees. Als say something about the way we did our cross validation. </p>
+The final model under investigation is the Random Forest model, which expands on the decision tree model by building several classification trees and leveraging "The wisdom of the crowd". The random forest model further adds to the complexity of a single decision tree by de-correlating the predictor variables. This is done by sampling a random number of features in the assessment of each split, for each tree of the ensemble. The Random forest model was implemented by calling the 'train' function in the 'caret' package. It should be noted that any parameters not mentioned were set to their default value. Hyper-parameter search was not conducted in an exhaustive fashion to extract the global minimum. Instead, values around the default for each mentioned hyper-parameter were chosen where possible, and 10-fold cross validation was used in order to find the hyper-parameter values resulting in the highest mean accuracy measure against the training-set. View .Rmd file for more information on the implementation. 
+
+Several hyper-parameters were optimized in the creation of the model: 
+
+- $mtry$ : The number of predictor variables randomly sampled without replacement at the assessment of each split. It should be noted that since sampling without replacement
+occurs at the node level, it is still possible to split on the same attribute multiple times in a tree. mtry was the first optimized hyper-parameter, by convention: $mtry = \sqrt(Number of predictors)$. Normally, one would take values around this default in the tuning process. However,since the number of predictor variables is only 8, it is possible to assess splitting on 1-8 variables. The resulting value of $mtry =6$ resulted in the highest mean accuracy of ~ 76.72%. This value of $mtry$ was utilized for tuning the remaining hyper-parameters. 
+
+- $maxnodes$: An important hyper-parameter to fend-off against over-fitting. This parameter places a constraint on the maximum number of leaf-nodes grown, for each tree in the ensemble. $maxnodes$ was optimized by taking a range of values from 5 to 15. The resulting mean accuracy scores did not confidently seem to taper to a lower value. Therefore, the range was extended to accommodate up to 30 $maxnodes$. The resultant $maxnodes$ value with the highest mean accuracy (~ 75.74 %) was $maxnodes = 13$   
+
+- $ntree$: The number of trees grown in the ensemble, for which the results will be averaged to return the final classification of the random forest.The default value for $ntree$ passed in the 'train' function is 500. The values explored in determining the best value for $ntree$ ranged from 400-1000 trees grown with an incremental increase of 50 trees. $ntree = 550$ resulted in the highest mean accuracy score of 76.07%. 
+
+- $nodesize$: Refers to the minimum number of observations required to be in the child-node if the parent node were to split. A higher $nodesize$ results in smaller trees, while a low value for $nodesize$ can risk over-fitting to the training data if unrestrained by other means. The default value for $noidesize$ in a random forest classification task is 1. Values were chosen in the range of 1:20.The highest mean accuracy in this cohort was 77.21%, resulting in $nodesize = 12$.
 
 ### Training results
-```{R}
+```{R , Insert = FALSE}
 # Define the control
 trControl <- caret::trainControl(method = "cv",
     number = 10,
     search = "grid")
 
-#try different mtry 
+#Investigate values for mtry between 1 and 8
 tuneGrid <- expand.grid(.mtry = 1: 8)
 rf_mtry <- train(diabetes ~ .,
     data = data_train %>% select(-Set, -Fold),
@@ -410,10 +411,11 @@ rf_mtry <- train(diabetes ~ .,
 best_mtry <- rf_mtry$bestTune$mtry 
 best_mtry
 
-#try different maxnode
+#Try different values for maxnodes
 store_maxnode <- list()
 tuneGrid <- expand.grid(.mtry = best_mtry)
-for (maxnodes in 5: 15) {
+for (maxnodes in 5: 15) { 
+      set.seed(1234)
     rf_maxnode <- train(diabetes ~ .,
     data = data_train %>% select(-Set, -Fold),
         method = "rf",
@@ -432,6 +434,7 @@ summary(results_mtry)
 store_maxnode <- list()
 tuneGrid <- expand.grid(.mtry = best_mtry)
 for (maxnodes in c(15: 30)) {
+      set.seed(1234)
     rf_maxnode <- train(diabetes ~ .,
     data = data_train %>% select(-Set, -Fold),
         method = "rf",
@@ -448,8 +451,9 @@ summary(results_node)
 
 #search for best ntree 
 store_maxtrees <- list()
-ntrees <- c(250, 300, 350, 400, 450, 500, 550, 600, 800, 1000, 2000)
+ntrees <- c(450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000)
 for (ntree in ntrees) {
+      set.seed(5678)
       rf_maxtrees <- train(diabetes ~ .,
       data = data_train %>% select(-Set, -Fold),
       method = "rf",
@@ -468,7 +472,8 @@ summary(results_tree)
 #search for best nodesize 
 store_nodesize <- list()
 tuneGrid <- expand.grid(.mtry = best_mtry)
-for (nodesize in 10: 30) {
+for (nodesize in 1: 20) {
+      set.seed(5678)
       rf_nodesize <- train(diabetes ~ .,
       data = data_train %>% select(-Set, -Fold),
       method = "rf",
@@ -482,7 +487,11 @@ for (nodesize in 10: 30) {
 }
 results_mtry <- resamples(store_nodesize)
 summary(results_mtry)
+```
 
+The hyper-parameter optimization for the Random Forest model resulted in the tuned values $mtry = 6$, $maxnodes=13$, $ntree=550$ and $nodesize=12$. Training resulted in the following variable importance plot. 
+
+```{r, Insert = FALSE}
 #Train the forest
 fit_rf <- train(diabetes ~ .,
     data = data_train %>% select(-Set, -Fold),
@@ -491,18 +500,55 @@ fit_rf <- train(diabetes ~ .,
     tuneGrid = tuneGrid,
     trControl = trControl,
     importance = TRUE,
-    ntree = 600,
-    nodesize = 23,
-    maxnodes = 18)
+    ntree = 550,
+    nodesize = 12,
+    maxnodes = 13)
 
+```
+
+The above training protocol resulted of the Random Forest Model resulted in the following confusion matrix when predicting on the test-set, and the following variable importance plot. 
+
+```{r}
 #Evaluate
 rf_preds <- predict(fit_rf, newdata= data_test)
 rf_matrix <- table(True = data_test$diabetes, Predicted = rf_preds)
 rf_matrix
+
+```
+```{r, echo = FALSE}
+rf_impvar <- varImp(fit_rf)
+plot(rf_impvar, main = "Random Forest Variable importance")
 ```
 
-###Comparison between models
-```{r}
+```{r, echo = FALSE}
+#Evaluate
+rf_confmat <- table(True = data_test$diabetes, Predicted = rf_preds)
+#calculate the most important metrics
+TN_rf <- rf_confmat[1, 1]
+FN_rf <- rf_confmat[2, 1]
+FP_rf <- rf_confmat[1, 2]
+TP_rf <- rf_confmat[2, 2]
 
+tibble(
+  Acc_rf = (TP_rf + TN_rf) / sum(rf_confmat),
+  TPR_rf = TP_rf / (TP_rf + FN_rf),
+  TNR_rf = TN_rf / (TN_rf + FP_rf),
+  FPR_rf = FP_rf / (TN_rf + FP_rf),
+  PPV_rf = TP_rf / (TP_rf + FP_rf),
+  NPV_rf = TN_rf / (TN_rf + FN_rf)
+)
+#ROC
+rf_preds_prob <- predict(fit_rf, newdata = data_test, type = "prob" )
+roc_rf <- roc(data_test$diabetes, rf_preds_prob[,2])
+ggroc(roc_rf) + theme_minimal() + labs(title = "Random Forest")
+```
+
+###McNemar Test results. 
+Put Mcnemar results here
+```{r}
+#Put Mcnemar results here, test for: 
+#classification vs Logistic. 
+#classification vs random forest
+#random forest vs classifcation 
 ```
 
