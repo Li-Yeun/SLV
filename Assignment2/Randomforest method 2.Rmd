@@ -1,0 +1,112 @@
+```{r}
+library(randomForest)
+#try different values of ntree
+rf.default <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold))
+rf.600 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 600)
+rf.700 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 600)
+rf.800 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 800)
+rf.900 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900)
+rf.1000 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 1000)
+
+rf.600
+rf.700
+rf.800
+rf.900
+rf.1000
+
+#ntree = 900 resuled in smallest oob error of 23.78%
+#change value of mtry default is 2. 
+
+rf.2 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =2)
+rf.3 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =3)
+rf.4 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =4)
+rf.5 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5)
+rf.6 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =6)
+rf.7 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =7)
+
+rf.2
+rf.3
+rf.4
+rf.5
+rf.6
+rf.7
+
+#select mtry = 5. 
+#pick best nodesize
+
+rf.ns5 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 5)
+rf.ns6 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6)
+rf.ns7 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 7 )
+rf.ns8 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 8)
+rf.ns9 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 9)
+rf.ns10 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 10)
+rf.ns11 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 11 )
+rf.ns12 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 12 )
+rf.ns13 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize =13 )
+rf.ns14 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize =14 )
+rf.ns15 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize =15 )
+rf.ns20 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 20)
+rf.ns25 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 25 )
+
+rf.ns5
+rf.ns6
+rf.ns7
+rf.ns8
+rf.ns9
+rf.ns10
+rf.ns11
+rf.ns12
+rf.ns13
+rf.ns14
+rf.ns15
+rf.ns20
+rf.ns25
+
+#nodesize = 6 returned oob error of ~ 22.64%. 
+
+#try different max nodes 
+
+rf.mn6 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 6)
+rf.mn7 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 7)
+rf.mn8 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 8)
+rf.mn9 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 9 )
+rf.mn10 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 10)
+rf.mn11 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 11)
+rf.mn12 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 12)
+rf.mn15 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 15)
+rf.mn16 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 16)
+rf.mn17 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 17)
+rf.mn18 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 18)
+rf.mn20 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 20)
+rf.mn25 <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 25)
+
+rf.mn6
+rf.mn7
+rf.mn8
+rf.mn9
+rf.mn10
+rf.mn11
+rf.mn12
+rf.mn15
+rf.mn17
+rf.mn18
+rf.mn16
+rf.mn20
+rf.mn25
+
+#train
+train_final_rf <- randomForest(diabetes ~ .,data = data_train %>% select(-Set, -Fold), ntree = 900, mtry =5, nodesize = 6, maxnodes = 16)
+
+#plot error
+plot(train_final_rf$err.rate[,1])
+
+#predict
+final_rf_pred <- predict(train_final_rf, newdata= data_test)
+help("randomForest")
+
+#matrix
+final_rf_matrix <- table(True = data_test$diabetes, Predicted = final_rf_pred)
+final_rf_matrix
+importance(reviews.rf88)
+varImpPlot(reviews.rf88)
+```
