@@ -6,7 +6,16 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 # Introduction
+The ability to cater preventive, diagnostic and treatment measures on a case-by-case bases despite the inherent variability present in individuals has widely been considered as the holy grail of modern medicine. However, decoding this inherent variability across a wide range of possible attributes that might effect a persons health was a non-trivial issue, which has since been explored by leveraging machine learning algorithms. To that end, the purpose of this study is to investigate the performance of several supervised learning algorithms at a diagnostic (diabetic vs. non-diabetic) classification task. Specifically, we will asses the performance of a Logistic Regression model (linear classifier), a classification tree (non-linear classier) and a Random Forest (ensemble of non-linear classifiers) at this task. The accuracy values of the models will be compared via the McNemar test in order to assess the performance of the linear vs non-linear models. As well as to determine if the performance of the ensemble model was significantly different from the individual models. 
+
+```{r}
+dim(data_complete)
+```
+
 ### The dataset
+The data-set under analysis for the purpose of this study is the "Pima Indians Diabetes Database", downloaded from Kaggle. The data was originally curated by the U.S based National Institute of Diabetes and Digestive and Kidney Diseases. The data-set contains 768 observations with each observation representing an individual. Along with 9 columns, where 8 of these columns are predictor variables and the final "diabetes" column states the class label (positive or negative). The label here refers to whether or not a person is diabetic. It is important to note that the data set acquired from Kaggle is a subset of the NIH database. In this study, all the observations refer to females at least 21 years of age and of Pima Indian heritage.The predictor variables include: The number of times pregnant ('preg'),the diastolic blood pressure ('pressure'), tricep skin-fold thickness ('triceps'), serum-insulin ('insulin'), B.M.I ('mass'), a measure of diabetes presence in the pedigree chart ('pedigree'), and age in years ('age'). 
+
+
 ```{r, include = FALSE}
 library(tidyverse)
 library(caret)
