@@ -247,6 +247,23 @@ plot_grid(plot_pregnant, plot_glucose, plot_pressure,
 
 ### Performance Results
 To be able to compare the performance of LR with other models, we construct the confusion matrix of predictions on the test data. From this confusion matrix, we compute the metrics that we think are most important.
+Here, we will list the metrics that we will use, alongside the abbreviations we used in the rest of the document.
+TP-> True positive. The number of cases that were correctly classified as having diabetes
+TN-> True negative. The number of cases  that were correctly classified as not having diabetes
+FN -> False negatives. The number of cases that were incorrectly classified as not having diabetes, when in reality they do.
+FP-> False positives. The number of cases that were incorrectly classified as having diabetes while being healthy.
+
+ACC -> Accuracy. The proportion of correctly classified cases.
+TPR-> True positive rate/ sensitivity. The proportion of cases with diabetes that were correctly classified as having diabetes.
+TNR-> True negative rate/ specificity. The proportion of healthy cases that were correctly classified as being healthy.
+PPV->Positive predictive value/precision. The proportion of predicted positive samples that really have diabetes.
+NPV->Negative predictive value. The proportion of predicted healthy samples that are truly healthy.
+F1-> F1 score. It's the harmonic mean of Positive predictive value and sensitivity. We use it as a measure of overall performance. It has the advantage of being unaffected by class imbalance.
+
+ROC curves will also be used since they are a great way to simultaneously visualize sensitivity and specificity throughout the range of possible thresholds.
+The AUC (area under the curve) is a good measure of the overall performance, and will also be used to compare the different models.
+
+
 
 ```{r, echo = FALSE}
 lr_pred_probs <- predict(lr_mod, newdata = data_test, type = "response")
@@ -260,13 +277,15 @@ FN <- lr_confmat[2, 1]
 FP <- lr_confmat[1, 2]
 TP <- lr_confmat[2, 2]
 
+
+
 tibble(
-  Acc = (TP + TN) / sum(lr_confmat),
+  ACC = (TP + TN) / sum(lr_confmat),
   TPR = TP / (TP + FN),
   TNR = TN / (TN + FP),
-  FPR = FP / (TN + FP),
   PPV = TP / (TP + FP),
-  NPV = TN / (TN + FN)
+  NPV = TN / (TN + FN),
+  F1 = 2*((PPV*TPR)/(PPV+TPR))
 )
 
 #ROC
@@ -275,6 +294,8 @@ ggroc(roc_lr) + theme_minimal() + labs(title = "Logistic Regression")
 
 roc_lr
 ```
+We see that our model classifies 0.7857143 of the unseen cases correctly. Looking more into the metrics we realise that out of the patients with diabetes only 64% of them were correctly identified by our logistic regression model. That is also shown by the F1 value which is significantly lower that the accuracy. 
+Nevertheless, we see an area under the curve of 0.8463, which is impressive for such a simple model.
 
 
 # Simple model: Classification Tree
@@ -360,12 +381,12 @@ FP_tree <- ctree_confmat[1, 2]
 TP_tree <- ctree_confmat[2, 2]
 
 tibble(
-  Acc_tree = (TP_tree + TN_tree) / sum(ctree_confmat),
-  TPR_tree = TP_tree / (TP_tree + FN_tree),
-  TNR_tree = TN_tree / (TN_tree + FP_tree),
-  FPR_tree = FP_tree / (TN_tree + FP_tree),
-  PPV_tree = TP_tree / (TP_tree + FP_tree),
-  NPV_tree = TN_tree / (TN_tree + FN_tree)
+  ACC = (TP_tree + TN_tree) / sum(ctree_confmat),
+  TPR = TP_tree / (TP_tree + FN_tree),
+  TNR = TN_tree / (TN_tree + FP_tree),
+  PPV = TP_tree / (TP_tree + FP_tree),
+  NPV = TN_tree / (TN_tree + FN_tree),
+  F1 = 2*((PPV*TPR)/(PPV+TPR))
 )
 #ROC
 ctree_preds_prob <- predict(ctree_mod, newdata = data_test)
@@ -374,6 +395,9 @@ roc_ctree <- roc(data_test$diabetes, ctree_preds_prob[,2])
 ggroc(roc_ctree) + theme_minimal() + labs(title = "Classification tree")
 roc_ctree
 ```
+
+We see that our model classifies 0.7662338 of the unseen cases correctly. We can again understand from looking at the rest of the metrics that the high accuracy is mostly because of the correct classification of healthy patients, which make up the majority of the cases.
+We see an area under the curve of 0.7554, which is significantly lower than the logistic regression model.
 
 # Complex Model: Random Forest 
 ### Approach
@@ -530,19 +554,23 @@ FP_rf <- rf_confmat[1, 2]
 TP_rf <- rf_confmat[2, 2]
 
 tibble(
-  Acc_rf = (TP_rf + TN_rf) / sum(rf_confmat),
-  TPR_rf = TP_rf / (TP_rf + FN_rf),
-  TNR_rf = TN_rf / (TN_rf + FP_rf),
-  FPR_rf = FP_rf / (TN_rf + FP_rf),
-  PPV_rf = TP_rf / (TP_rf + FP_rf),
-  NPV_rf = TN_rf / (TN_rf + FN_rf)
+  ACC = (TP_rf + TN_rf) / sum(rf_confmat),
+  TPR = TP_rf / (TP_rf + FN_rf),
+  TNR = TN_rf / (TN_rf + FP_rf),
+  PPV = TP_rf / (TP_rf + FP_rf),
+  NPV = TN_rf / (TN_rf + FN_rf),
+  F1 = 2*((PPV*TPR)/(PPV+TPR))
 )
 #ROC
 rf_preds_prob <- predict(fit_rf, newdata = data_test, type = "prob" )
 roc_rf <- roc(data_test$diabetes, rf_preds_prob[,2])
 ggroc(roc_rf) + theme_minimal() + labs(title = "Random Forest")
-```
 
+roc_rf
+```
+Finally, our random forest has an accuracy of 0.7792208, and 66% of the diseased patients were crrectly classified, which is the highest we have seen. 
+The area under the curve for our random forest is also the highest of all of our models. 
+We see that our random forest significantly outperforms its simplified equivalent, and slightly outperforms the logistic regression.
 ###McNemar Test results. 
 Put Mcnemar results here
 ```{r}
