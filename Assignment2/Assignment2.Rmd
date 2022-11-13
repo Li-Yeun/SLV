@@ -66,7 +66,7 @@ mice::md.pattern(data_complete, rotate.names = TRUE)
 ```
 
 ### Summary statistics
-To determine whether the imputation has altered the properties of our dataset we will extract some summary statistics, and create some exploratory plots concerning the distribution of each value in healthy and diseased individuals. 
+In order to get a grip of our data and to also determine whether the imputation has altered the properties of our dataset we will extract some summary statistics, and create some exploratory plots concerning the distribution of each value in healthy and diseased individuals. 
 ```{r, echo = FALSE}
 "The dataset before imputation"
 summary(PimaIndiansDiabetes2)
@@ -98,7 +98,8 @@ data_complete %>%
 
 
 ```
-Looking at the density plots, as well as the summary statistics, we can conclude that imputing the missing values has not altered the distribution of our data. So we believe it is safe to use the imputed dataset from this point on.
+These give us an insight in our dataset. We see for example that the glucose ranges between 44 and 199, with an average of 121.6, that we have individuals between the age of 21 and 81, that we have a person that has been pregnant 17 times! in the past and more. We also see that our dataset is imbalanced,with 500 negative and 268 positive individuals. 
+We can conclude that imputing the missing values has not altered the distribution of our data. So we believe it is safe to use the imputed dataset from this point on.
 
 ### Models and Metrics
 In our analysis we consider three models. We would classify two models as being simple: the logistic regression and the classification tree. As a more complex model, we consider the random forest. 
@@ -500,7 +501,7 @@ ggroc(roc_rf) + theme_minimal() + labs(title = "Random Forest")
 
 roc_rf
 ```
-Finally, our random forest has an accuracy of 0.7792208, and 66% of the diseased patients were crrectly classified, which is the highest we have seen. 
+Finally, our random forest has an accuracy of 0.7857143, and 70% of the diseased patients were correctly classified, which is the highest we have seen. 
 The area under the curve for our random forest is also the highest of all of our models. 
 We see that our random forest significantly outperforms its simplified equivalent, and slightly outperforms the logistic regression.
 
