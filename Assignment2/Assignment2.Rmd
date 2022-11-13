@@ -29,7 +29,7 @@ set.seed(45)
 ```
 
 ### Missing values
-When exploring the dataset, we observed that there are quite some missing values in the dataset. The number of missing values per variable is computed below. We see that the variable `insulin` contains a lot of missing values: almost 50% of the observations has no record for insulin. We can therefore not simply throw away all rows with a missing value, it is a too large fraction of the dataset. We have to deal with the missing values in a different way.
+When exploring the dataset, we observed that there was a considerable amount of missing values. The number of missing values per variable is computed below. We see that the variable `insulin` contains a lot of missing values: almost 50% of the observations has no record for insulin. Therefore, We cannot simply throw away all rows with missing values since it constitutes a large fraction of the dataset. We have to deal with the missing values in a different way.
 
 ```{r, echo = FALSE}
 nr_nas <- 1:9
@@ -45,7 +45,7 @@ Let us first inspect the missing data in a little bit more detail. From the miss
 ```{r, echo = FALSE}
 mice::md.pattern(PimaIndiansDiabetes2, rotate.names = TRUE)
 ```
-We decided to work around the problem of missing values by imputing them: the package `mice` has a nice function for this. Credits of this approach go to Gerko Vink who pointed us in the right direction and helped us a lot by providing some example code. After imputing the missing values, there are none left as can be seen from the table below. We can now start fitting our models and make predictions!
+We decided to work around the problem of missing values by imputing them: the package `mice` has a nice function for this. Credits to this approach go to Gerko Vink who pointed us in the right direction and helped us a lot by providing some example code. After imputing the missing values, we can confirm that there are none left from the table below. We can now move forward with inspecting the data and creating the models. 
 
 ```{r}
 data_complete <- PimaIndiansDiabetes2 %>% 
@@ -66,7 +66,7 @@ mice::md.pattern(data_complete, rotate.names = TRUE)
 ```
 
 ### Summary statistics
-In order to get a grip of our data and to also determine whether the imputation has altered the properties of our dataset we will extract some summary statistics, and create some exploratory plots concerning the distribution of each value in healthy and diseased individuals. 
+In order to get a grip on our data and to also determine whether the imputation has altered the properties of our dataset, we will extract some summary statistics, and create some exploratory plots concerning the distribution of each value in healthy and diseased individuals. 
 ```{r, echo = FALSE}
 "The dataset before imputation"
 summary(PimaIndiansDiabetes2)
@@ -98,13 +98,13 @@ data_complete %>%
 
 
 ```
-These give us an insight in our dataset. We see for example that the glucose ranges between 44 and 199, with an average of 121.6, that we have individuals between the age of 21 and 81, that we have a person that has been pregnant 17 times! in the past and more. We also see that our dataset is imbalanced,with 500 negative and 268 positive individuals. 
+These give us an insight in our dataset. We see for example that the glucose ranges between 44 and 199, with an average of 121.6, that we have individuals between the age of 21 and 81 and that we have a person that has been pregnant 17 times! We also see that our dataset is imbalanced, with 500 negative and 268 positive individuals. 
 We can conclude that imputing the missing values has not altered the distribution of our data. So we believe it is safe to use the imputed dataset from this point on.
 
 ### Models and Metrics
-In our analysis we consider three models. We would classify two models as being simple: the logistic regression and the classification tree. As a more complex model, we consider the random forest. 
+In our analysis we consider three models. We would classify two models as being simple: the Logistic Regression (LR) and the Classification Tree (CT). As a more complex model, we consider the Random Forest (RF). 
 
-To be able to compare the performance of LR with other models, we construct the confusion matrix of predictions on the test data. Here, we will list the metrics that we will use, alongside the abbreviations we used in the rest of the document.
+To be able to state and compare the performance of our models, we construct the confusion matrix of predictions on the test data. Here, we will list the metrics that we will use, alongside the abbreviations we used in the rest of the document.
 
 - TP: True positive. The number of cases that were correctly classified as having diabetes.  
 - TN: True negative. The number of cases  that were correctly classified as not having diabetes.  
@@ -120,10 +120,10 @@ To be able to compare the performance of LR with other models, we construct the 
 ROC curves will also be used since they are a great way to simultaneously visualize sensitivity and specificity throughout the range of possible thresholds.
 The AUC (area under the curve) is a good measure of the overall performance, and will also be used to compare the different models.
 
-Besides the "standard" metrics summed up above, we would also like to draw significant conclusions if the performance of models is different. We are able to draw these significant conclusion by performing the McNemar's test. The McNemar test was employed in order to compare the performance of our classifiers via their accuracy score. This non-parametric statistical test receives input in the form of a 2x2 contingency table and is produced by tallying the number of correct and incorrect predictions made by the two models under investigation. Worth noting, The null hypothesis states that the row and column marginal frequencies of the contingency table are not statistically different. A positive McNemar test which denotes a significant difference is reached when the p-value is less than 0.05, at a 95 % confidence interval. First,we will compare the performance of the non-linear classifiers: Classification Tree and Random Forest against the logistic regression model. Furthermore, we will compare the performance of the single classification tree against the more complex Random forest algorithm. 
+Besides the "standard" metrics summed up above, we would also like to draw significant conclusions based on the relative performance of our models to each other. We are able to draw these significant conclusion by performing a statistical test. The McNemar test was employed in order to compare the performance of our classifiers via their accuracy score. This non-parametric statistical test receives input in the form of a 2x2 contingency table and is produced by tallying the number of correct and incorrect predictions made by the two models under investigation. Worth noting, The null hypothesis states that the row and column marginal frequencies of the contingency table are not statistically different. A positive McNemar test which denotes a significant difference is reached when the p-value is less than 0.05, at a 95 % confidence interval. In order to determine if the differences in accuracy of the models we see when predicting on the test-set is significant, we will compare the performance of the non-linear classifiers: Classification Tree and Random Forest against the logistic regression model, respectively. Furthermore, we will compare the performance of the single classification tree against the more complex Random forest algorithm, to determine if the added complexity of the random forest offers it an advantage in this diagnostic task. 
 
 ### Creating training and testing sets
-Before we start training our models we divide the dataset into a training and a test set. For the training set we will use 80% of the data (614 observations) and the test set will be formed by the remaining 20% (154 observations). For training the tree we will perform a 10-fold cross-validation. Hence, the 614 training observations will be divided in six folds of 61 observations and four folds of 62 observations. These folds are not necessary for training the forest: for that we will use the out-of-bag (OOB) error.
+Before we start training our models we divide the dataset into a training and a test set. For the training set we will use 80% of the data (614 observations) and the test set will be formed by the remaining 20% (154 observations). For training the tree we will perform a 10-fold cross-validation. Hence, the 614 training observations will be divided in six folds of 61 observations and four folds of 62 observations. These folds are not necessary for training the forest: for that we will use a different metric which we will expound upon in later sections, namely the out-of-bag (OOB) error.
 
 ```{r}
 data_complete <- data_complete %>% 
@@ -302,7 +302,7 @@ ggroc(roc_lr) + theme_minimal() + labs(title = "Logistic Regression")
 
 roc_lr
 ```
-We see that our model classifies 0.7857143 of the unseen cases correctly. Looking more into the metrics we realise that out of the patients with diabetes only 64% of them were correctly identified by our logistic regression model. That is also shown by the F1 value which is significantly lower that the accuracy. 
+We see that our model classifies 0.7857143 of the unseen cases correctly. Looking more into the metrics we realize that out of the patients with diabetes, only 64% of them were correctly identified by our logistic regression model. That is also shown by the F1 value which is significantly lower that the accuracy. 
 Nevertheless, we see an area under the curve of 0.8463, which is impressive for such a simple model.
 
 
@@ -412,7 +412,7 @@ We see an area under the curve of 0.7554, which is significantly lower than the 
 
 # Complex Model: Random Forest 
 ### Approach
-The final model under investigation is the Random Forest model, which expands on the decision tree model by building several classification trees and leveraging "The wisdom of the crowd". The random forest model further adds to the complexity of a single decision tree by de-correlating the predictor variables. This is done by sampling a random number of features in the assessment of each split, for each tree of the ensemble. The Random forest model was implemented by calling the `randomForest` function in the package bearing the same name. It should be noted that any parameters not mentioned were set to their default value. Hyperparameter search was not conducted in an exhaustive fashion to extract the global minimum. Instead, values around the default for each mentioned hyper-parameter were chosen where possible. The OOB-error averaged over all trees in a forest is used to compare forests and decide upon the hyperparameters. View .Rmd file for more information on the implementation. 
+The final model under investigation is the Random Forest model, which expands on the decision tree model by building several classification trees and leveraging "The wisdom of the crowd". The random forest model further adds to the complexity of a single decision tree by de-correlating the predictor variables. This is done by sampling a random number of features in the assessment of each split, for each tree of the ensemble. The Random forest model was implemented by calling the `randomForest` function in the package bearing the same name. It should be noted that any parameters not mentioned were set to their default value. Hyperparameter search was not conducted in an exhaustive fashion to extract the global minimum. Instead, values around the default for each mentioned hyper-parameter were chosen where possible. The OOB-error averaged over all trees in a forest is used to compare forests and decide upon the hyperparameters. This measure of error is computed by predicting the generated model on the 'out-of'-bag' sample. This sample consists of observations that were left out during random sampling. It is possible to compare hyper-parameters via this measure since each individual iteration was trained on its own out-of-bag sample. View .Rmd file for more information on the implementation. 
 
 Several hyperparameters were optimized in the creation of the model: 
 
@@ -505,11 +505,8 @@ Finally, our random forest has an accuracy of 0.7857143, and 70% of the diseased
 The area under the curve for our random forest is also the highest of all of our models. 
 We see that our random forest significantly outperforms its simplified equivalent, and slightly outperforms the logistic regression.
 
-# Comparing the models
-### Metrics and ROC
-
-### McNemar's test
-We have performed McNemar's test thrice: one time for each pair of models. As we were not sure which R function we could use, we have coded the test ourselves. Please view the .Rmd for this implementation.
+# McNemar's test
+We have performed McNemar's test thrice: one time for each pair of models.The test was implemented manually without without the use of a dedicated R function. Please view the .Rmd for the implementation.
 
 ```{r, include = FALSE}
 mcnemar <- function(preds1, preds2){
@@ -563,4 +560,9 @@ lr_vs_rf <- mcnemar(lr_preds, rf_preds)
 lr_vs_rf
 ```
 
-The results of the three-fold McNemar test tell us that the difference in performance of the models is not significant. Of course we have to note that the difference is computed on just 154 cases: maybe the difference become significant when a larger (test) dataset is used. 
+# Conclusion
+The results of the three-fold McNemar's test shows that the difference in performance of the three models, using accuracy as a measure, is not significant. One would expect that the non-linear property of the tree algorithms would offer an advantage in such a diagnostic classification task when compared to the linear regression model. However, the simplicity of the logistic regression model might have offered it the flexibility to generalize to the test set. We should note that the relatively small size of 154 cases might have been predominated by the effect of a select few of our 8 predictors. This effect might have seeped itself into all 3 models, resulting in the high correlation in classification between the compared algorithms. Case in point, blood glucose level was a variable which greatly impacted the probability of a classification. This is further corroborated by the seemingly linear relationship between blood glucose level and the prediction probability of the positive class in the logistic regression model. As well as with the multiple splits on glucose in the classification tree. In the case of the random forest, de-correlating the variables did not seem to affect the classification performance relative to the LR or CT. The random forest sampled only 2 variables with each split, which reduces the chances of weighing 'glucose' in the computation of the optimal splits. This effect however might have been curbed by averaging the 300 trees grown. Furthermore, allowing 30 leaf-nodes per tree could increases the chances of splitting on glucose at some point, even when sampling only 2 predictors. All of these factors come together to result in a model which over-fit the training data, while heavily weighing one predictor variable in the classification. Lastly, the class imbalance might have affected the performance when predicting the diseased category, which in a medical scenario is very undesirable. One would prefer a greater number of false positives than false negatives. The reasoning here is that we accept healthy individuals to be classified as diabetic, since further testing could dismiss this idea. However, classifying a diabetic individual as healthy could opt them out of seeking further testing that would indeed reveal a positive case. 
+
+###
+###
+###
